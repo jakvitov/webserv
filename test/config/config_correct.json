@@ -1,5 +1,5 @@
 {
-    "ports":[22],
+    "ports":[3000],
     "content_root":"dfa",
     "log_dest":"dafjkd"
 }

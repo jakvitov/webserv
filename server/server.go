@@ -3,6 +3,7 @@ package server
 import (
 	"cz/jakvitov/webserv/config"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -48,6 +49,7 @@ func ServerInit(inputCnf *config.WebserverConfig) *Server {
 		httpServers: initHttpServers(inputCnf),
 		logger:      log.New(writer, LOG_PREFIX, log.Ltime),
 	}
+	srv.logger.SetOutput(io.MultiWriter(writer, os.Stdout))
 	return srv
 }
 
