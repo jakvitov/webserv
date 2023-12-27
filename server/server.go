@@ -3,14 +3,19 @@ package server
 import (
 	"cz/jakvitov/webserv/config"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
+
+const LOG_PREFIX string = "WEBSERV_SERVER:"
 
 // Crentral struct holding info about all the http listeners and config
 type Server struct {
 	cnf         *config.WebserverConfig
 	httpServers []*http.Server
+	logger      *log.Logger
 }
 
 func initHttpServers(cnf *config.WebserverConfig) []*http.Server {
@@ -28,15 +33,27 @@ func initHttpServers(cnf *config.WebserverConfig) []*http.Server {
 }
 
 func ServerInit(inputCnf *config.WebserverConfig) *Server {
+	writer, err := os.Open(inputCnf.LogDest)
+	if err != nil {
+		fmt.Printf("Error opening log file [%s], creating one instead.\n", inputCnf.LogDest)
+		writerC, err := os.Create(inputCnf.LogDest)
+		if err != nil {
+			panic(fmt.Sprintf("Error while creating a log file: [%s]\n", err.Error()))
+		}
+		writer = writerC
+	}
+
 	srv := &Server{
 		cnf:         inputCnf,
 		httpServers: initHttpServers(inputCnf),
+		logger:      log.New(writer, LOG_PREFIX, log.Ltime),
 	}
 	return srv
 }
 
 func (s *Server) StartListening() {
 	for _, srv := range s.httpServers {
-		srv.ListenAndServe()
+		s.logger.Printf("Starting listener on port [%s]\n", srv.Addr)
+		s.logger.Fatal(srv.ListenAndServe())
 	}
 }
