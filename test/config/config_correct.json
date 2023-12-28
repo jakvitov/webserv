@@ -1,5 +1,5 @@
 {
     "ports":[3000],
-    "content_root":"dfa",
-    "log_dest":"dafjkd"
+    "content_root":"../test/web_content/only_index_webpage",
+    "log_dest":"test_logfile.log"
 }

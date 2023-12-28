@@ -9,6 +9,7 @@ type HttpRequestHandler struct {
 
 // Request handlers for server requests
 func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Under construction"))
 }
 

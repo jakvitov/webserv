@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"cz/jakvitov/webserv/config"
 	"fmt"
 	"io"
@@ -10,13 +11,15 @@ import (
 	"time"
 )
 
-const LOG_PREFIX string = "WEBSERV_SERVER:"
+const INFO_LOG_PREFIX string = "WEBSERV_SERVER [INFO]:"
+const ERROR_LOG_PREFIX string = "WEBSERV_SERVER [ERROR]:"
 
 // Crentral struct holding info about all the http listeners and config
 type Server struct {
 	cnf         *config.WebserverConfig
 	httpServers []*http.Server
-	logger      *log.Logger
+	infoLogger  *log.Logger
+	errorLogger *log.Logger
 }
 
 func initHttpServers(cnf *config.WebserverConfig) []*http.Server {
@@ -47,15 +50,25 @@ func ServerInit(inputCnf *config.WebserverConfig) *Server {
 	srv := &Server{
 		cnf:         inputCnf,
 		httpServers: initHttpServers(inputCnf),
-		logger:      log.New(writer, LOG_PREFIX, log.Ltime),
+		infoLogger:  log.New(io.MultiWriter(os.Stdout, writer), INFO_LOG_PREFIX, log.Ltime),
+		errorLogger: log.New(io.MultiWriter(os.Stderr, writer), ERROR_LOG_PREFIX, log.Ltime),
 	}
-	srv.logger.SetOutput(io.MultiWriter(writer, os.Stdout))
 	return srv
 }
 
 func (s *Server) StartListening() {
 	for _, srv := range s.httpServers {
-		s.logger.Printf("Starting listener on port [%s]\n", srv.Addr)
-		s.logger.Fatal(srv.ListenAndServe())
+		go func(s *Server, srv *http.Server) {
+			s.infoLogger.Printf("Starting listener on port [%s]\n", srv.Addr)
+			log.Fatal(srv.ListenAndServe())
+			defer s.errorLogger.Fatal(srv.Shutdown(context.Background()))
+		}(s, srv)
+	}
+}
+
+func (s *Server) Shutdown() {
+	for _, srv := range s.httpServers {
+		s.infoLogger.Printf("Trying mercifull shutdown on listener,  port [%s]\n", srv.Addr)
+		s.errorLogger.Fatal(srv.Shutdown(context.Background()))
 	}
 }
