@@ -37,7 +37,8 @@ func initHttpServers(cnf *config.WebserverConfig) []*http.Server {
 }
 
 func ServerInit(inputCnf *config.WebserverConfig) *Server {
-	writer, err := os.Open(inputCnf.LogDest)
+	//Open as create or append
+	writer, err := os.OpenFile(inputCnf.LogDest, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		fmt.Printf("Error opening log file [%s], creating one instead.\n", inputCnf.LogDest)
 		writerC, err := os.Create(inputCnf.LogDest)
