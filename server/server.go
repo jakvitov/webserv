@@ -4,6 +4,7 @@ import (
 	"context"
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/sharedlogger"
+	"cz/jakvitov/webserv/static"
 	"fmt"
 	"log"
 	"net/http"
@@ -58,6 +59,7 @@ func ServerInit(inputCnf *config.WebserverConfig) *Server {
 }
 
 func (s *Server) StartListening(wg *sync.WaitGroup) {
+	static.PrintBannerDecoration(s.logger)
 	for _, srv := range s.httpServers {
 		wg.Add(1)
 		go func(s *Server, srv *http.Server) {
