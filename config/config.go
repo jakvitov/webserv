@@ -1,7 +1,7 @@
 package config
 
 import (
-	"cz/jakvitov/webserv/errors"
+	"cz/jakvitov/webserv/err"
 	"encoding/json"
 	"os"
 )
@@ -14,7 +14,7 @@ type WebserverConfig struct {
 }
 
 // Check for mandatory fields - non empty
-func checkMandatoryFields(wc *WebserverConfig) *errors.ConfigParseError {
+func checkMandatoryFields(wc *WebserverConfig) *err.ConfigParseError {
 	mf := make([]string, 0)
 	if len(wc.Ports) == 0 {
 		mf = append(mf, "ports")
@@ -28,7 +28,7 @@ func checkMandatoryFields(wc *WebserverConfig) *errors.ConfigParseError {
 	if len(mf) == 0 {
 		return nil
 	}
-	return errors.ConfigParseErrorInit(mf)
+	return err.ConfigParseErrorInit(mf)
 }
 
 // Given a path, return a ptr to a read and parsed Webserver config

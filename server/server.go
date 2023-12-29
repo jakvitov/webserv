@@ -22,12 +22,12 @@ type Server struct {
 	logger      *sharedlogger.SharedLogger
 }
 
-func initHttpServers(cnf *config.WebserverConfig) []*http.Server {
+func initHttpServers(cnf *config.WebserverConfig, logger *sharedlogger.SharedLogger) []*http.Server {
 	res := make([]*http.Server, len(cnf.Ports))
 	for i, port := range cnf.Ports {
 		res[i] = &http.Server{
 			Addr:           fmt.Sprintf(":%d", port),
-			Handler:        HttpRequestHandlerInit(),
+			Handler:        HttpRequestHandlerInit(logger),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			MaxHeaderBytes: 1 << 20,
@@ -48,10 +48,11 @@ func ServerInit(inputCnf *config.WebserverConfig) *Server {
 		writer = writerC
 	}
 
+	lg := sharedlogger.SharedLoggerInit(writer)
 	srv := &Server{
 		cnf:         inputCnf,
-		httpServers: initHttpServers(inputCnf),
-		logger:      sharedlogger.SharedLoggerInit(writer),
+		logger:      lg,
+		httpServers: initHttpServers(inputCnf, lg),
 	}
 	return srv
 }
