@@ -45,6 +45,10 @@ func (s *SharedLogger) Info(message string) {
 	s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), message)
 }
 
+func (s *SharedLogger) Finfo(input string, args ...any) {
+	s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), fmt.Sprintf(input, args...))
+}
+
 func (s *SharedLogger) Warn(message string) {
 	s.infoLogger.Printf("%s;%s;%s\n", WARN_PREFIX, getDateTimeLogPrefix(), message)
 }

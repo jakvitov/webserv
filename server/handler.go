@@ -24,18 +24,17 @@ func (h *HttpRequestHandler) badRequest(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(505)
 	w.Write([]byte(BAD_REQUEST))
 	h.logger.Info("Returning 505")
-	return
 }
 
 func (h *HttpRequestHandler) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	w.Write([]byte(NOT_FOUND))
 	h.logger.Info("Returning 404")
-	return
 }
 
 // Request handlers for server requests
 func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.logger.LogHttpRequest(r)
 	//Check for items on the black list and return bad request if present
 	for _, item := range URL_BLACKLIST {
 		if strings.Contains(r.URL.RequestURI(), item) {
@@ -43,7 +42,6 @@ func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	h.logger.Info(fmt.Sprintf("%s%s", h.root, "/index.html"))
 	file, err := os.ReadFile(fmt.Sprintf("%s%s", h.root, "/index.html"))
 	if err != nil {
 		h.notFound(w, r)
