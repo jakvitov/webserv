@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/google/uuid"
 )
 
 const BAD_REQUEST string = "Bad request"
@@ -18,37 +20,38 @@ type HttpRequestHandler struct {
 	root   string
 }
 
-func (h *HttpRequestHandler) badRequest(w http.ResponseWriter, r *http.Request) {
+func (h *HttpRequestHandler) badRequest(w http.ResponseWriter, uuid string) {
 	w.WriteHeader(505)
 	w.Write([]byte(BAD_REQUEST))
-	h.logger.LogHttpResponse(505, r)
+	h.logger.LogHttpResponse(505, uuid)
 }
 
-func (h *HttpRequestHandler) notFound(w http.ResponseWriter, r *http.Request) {
+func (h *HttpRequestHandler) notFound(w http.ResponseWriter, uuid string) {
 	w.WriteHeader(404)
 	w.Write([]byte(NOT_FOUND))
-	h.logger.LogHttpResponse(404, r)
+	h.logger.LogHttpResponse(404, uuid)
 }
 
-func (h *HttpRequestHandler) ok(w http.ResponseWriter, r *http.Request, response []byte) {
+func (h *HttpRequestHandler) ok(w http.ResponseWriter, response []byte, uuid string) {
 	w.WriteHeader(200)
 	w.Write(response)
-	h.logger.LogHttpResponse(200, r)
+	h.logger.LogHttpResponse(200, uuid)
 }
 
 // Request handlers for server requests
 func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.logger.LogHttpRequest(r)
+	uuid := uuid.NewString()
+	h.logger.LogHttpRequest(r, uuid)
 	path := r.URL.Path
 	if path == "/" {
 		path = "index.html"
 	}
 	file, err := os.ReadFile(fmt.Sprintf("%s/%s", h.root, path))
 	if err != nil {
-		h.notFound(w, r)
+		h.notFound(w, uuid)
 		return
 	}
-	h.ok(w, r, file)
+	h.ok(w, file, uuid)
 }
 
 // We map routes to individual handlers in a mux

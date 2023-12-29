@@ -20,11 +20,11 @@ func getUserIpFromRequest(r *http.Request) string {
 }
 
 // Basic info log about an incomming http request
-func (l *SharedLogger) LogHttpRequest(r *http.Request) {
-	l.Finfo("Req[%s;%s;%s;%s]", getUserIpFromRequest(r), r.URL.Path, r.Method, r.Body)
+func (l *SharedLogger) LogHttpRequest(r *http.Request, uuid string) {
+	l.Finfo("Req[%s;%s;%s;%s;%s]", getUserIpFromRequest(r), r.URL.Path, r.Method, r.Body, uuid)
 }
 
 // Basic info log about an incomming http request
-func (l *SharedLogger) LogHttpResponse(code int, r *http.Request) {
-	l.Finfo("Res[%s;%s;%s;%s;%d]", getUserIpFromRequest(r), r.URL.Path, r.Method, r.Body, code)
+func (l *SharedLogger) LogHttpResponse(code int, uuid string) {
+	l.Finfo("Res[%s;%d]", uuid, code)
 }
