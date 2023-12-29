@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 )
-
-var URL_BLACKLIST []string = []string{"../"}
 
 const BAD_REQUEST string = "Bad request"
 const NOT_FOUND string = "Not found"
+const OK string = "Ok"
 
 // Holds all the muxes and routes each request to its proper handler
 type HttpRequestHandler struct {
@@ -23,33 +21,34 @@ type HttpRequestHandler struct {
 func (h *HttpRequestHandler) badRequest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(505)
 	w.Write([]byte(BAD_REQUEST))
-	h.logger.Info("Returning 505")
+	h.logger.LogHttpResponse(505, r)
 }
 
 func (h *HttpRequestHandler) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	w.Write([]byte(NOT_FOUND))
-	h.logger.Info("Returning 404")
+	h.logger.LogHttpResponse(404, r)
+}
+
+func (h *HttpRequestHandler) ok(w http.ResponseWriter, r *http.Request, response []byte) {
+	w.WriteHeader(200)
+	w.Write(response)
+	h.logger.LogHttpResponse(200, r)
 }
 
 // Request handlers for server requests
 func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.logger.LogHttpRequest(r)
-	//Check for items on the black list and return bad request if present
-	for _, item := range URL_BLACKLIST {
-		if strings.Contains(r.URL.RequestURI(), item) {
-			h.badRequest(w, r)
-			return
-		}
+	path := r.URL.Path
+	if path == "/" {
+		path = "index.html"
 	}
-	file, err := os.ReadFile(fmt.Sprintf("%s%s", h.root, "/index.html"))
+	file, err := os.ReadFile(fmt.Sprintf("%s/%s", h.root, path))
 	if err != nil {
 		h.notFound(w, r)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(file)
+	h.ok(w, r, file)
 }
 
 // We map routes to individual handlers in a mux
