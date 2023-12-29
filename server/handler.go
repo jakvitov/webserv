@@ -43,7 +43,8 @@ func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	file, err := os.ReadFile(fmt.Sprintf("%s%s", h.root, "index.html"))
+	h.logger.Info(fmt.Sprintf("%s%s", h.root, "/index.html"))
+	file, err := os.ReadFile(fmt.Sprintf("%s%s", h.root, "/index.html"))
 	if err != nil {
 		h.notFound(w, r)
 		return
@@ -58,11 +59,12 @@ func (h *HttpRequestHandler) registerHandlers() {
 	h.mux.Handle("/", h)
 }
 
-func HttpRequestHandlerInit(il *sharedlogger.SharedLogger) *HttpRequestHandler {
+func HttpRequestHandlerInit(il *sharedlogger.SharedLogger, root string) *HttpRequestHandler {
 	mux := http.NewServeMux()
 	res := &HttpRequestHandler{
 		mux:    mux,
 		logger: il,
+		root:   root,
 	}
 	//Register handlers
 	res.registerHandlers()

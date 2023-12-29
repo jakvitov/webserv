@@ -28,7 +28,7 @@ func initHttpServers(cnf *config.WebserverConfig, logger *sharedlogger.SharedLog
 	for i, port := range cnf.Ports {
 		res[i] = &http.Server{
 			Addr:           fmt.Sprintf(":%d", port),
-			Handler:        HttpRequestHandlerInit(logger),
+			Handler:        HttpRequestHandlerInit(logger, cnf.RootDir),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			MaxHeaderBytes: 1 << 20,
