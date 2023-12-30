@@ -5,8 +5,8 @@ import (
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/sharedlogger"
 	"cz/jakvitov/webserv/static"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -29,8 +29,8 @@ func initHttpServers(cnf *config.WebserverConfig, logger *sharedlogger.SharedLog
 		res[i] = &http.Server{
 			Addr:           fmt.Sprintf(":%d", port),
 			Handler:        HttpRequestHandlerInit(logger, cnf.RootDir),
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
+			ReadTimeout:    1 * time.Second,
+			WriteTimeout:   1 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		}
 	}
@@ -62,10 +62,24 @@ func (s *Server) StartListening(wg *sync.WaitGroup) {
 	static.PrintBannerDecoration(s.logger)
 	for _, srv := range s.httpServers {
 		wg.Add(1)
+		s.logger.Info("Increasing wg")
 		go func(s *Server, srv *http.Server) {
 			s.logger.Info(fmt.Sprintf("Starting listener on port [%s]\n", srv.Addr))
-			log.Fatal(srv.ListenAndServe())
-			defer s.logger.Error(srv.Shutdown(context.Background()).Error())
+			err := srv.ListenAndServe()
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				s.logger.Fatal(err.Error())
+			}
+			defer wg.Done()
 		}(s, srv)
+	}
+}
+
+// Force quit all listening servers
+func (s *Server) Shutdown() {
+	for _, srv := range s.httpServers {
+		if err := srv.Shutdown(context.Background()); err != nil {
+			s.logger.Error(err.Error())
+		}
+		s.logger.Info("Decreasing wg")
 	}
 }
