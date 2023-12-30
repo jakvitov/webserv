@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -59,12 +61,12 @@ func ServerInit(inputCnf *config.WebserverConfig) *Server {
 }
 
 func (s *Server) StartListening(wg *sync.WaitGroup) {
+	s.ListenForSigterm()
 	static.PrintBannerDecoration(s.logger)
 	for _, srv := range s.httpServers {
 		wg.Add(1)
-		s.logger.Info("Increasing wg")
 		go func(s *Server, srv *http.Server) {
-			s.logger.Info(fmt.Sprintf("Starting listener on port [%s]\n", srv.Addr))
+			s.logger.Finfo("Starting listener on port [%s]\n", srv.Addr)
 			err := srv.ListenAndServe()
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				s.logger.Fatal(err.Error())
@@ -80,6 +82,22 @@ func (s *Server) Shutdown() {
 		if err := srv.Shutdown(context.Background()); err != nil {
 			s.logger.Error(err.Error())
 		}
-		s.logger.Info("Decreasing wg")
 	}
+}
+
+// Listends for sigterm system signal and tries to gracefully shutdown afterwards
+func (s *Server) ListenForSigterm() {
+	//Channel listening to sigterm signal
+	sigNotif := make(chan os.Signal, 1)
+	signal.Notify(sigNotif,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+	go func() {
+		//Listen for termination signal
+		sig := <-sigNotif
+		s.logger.Finfo("Recieved [%s] signal. Attempting gracefull shutdown.", sig.String())
+		s.Shutdown()
+	}()
 }
