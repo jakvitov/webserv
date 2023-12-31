@@ -6,11 +6,11 @@
     },
 
     "logger" : {
-        "logger_level": ["INFO", "WARN", "ERROR", "FATAL"],
+        "level": ["INFO", "WARN", "ERROR", "FATAL"],
 
-        "logger_output_std": true,
+        "output_std": true,
 
-        "logger_output_file": "",
+        "output_file": "",
 
         "append_output": true 
     },

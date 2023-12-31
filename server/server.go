@@ -97,7 +97,7 @@ func (s *Server) ListenForSigterm() {
 	go func() {
 		//Listen for termination signal
 		sig := <-sigNotif
-		s.logger.Finfo("Recieved [%s] signal. Attempting gracefull shutdown.", sig.String())
+		s.logger.Finfo("Recieved %s signal. Attempting gracefull shutdown.", sig.String())
 		s.Shutdown()
 	}()
 }
