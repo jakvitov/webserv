@@ -5,6 +5,14 @@ import (
 	"os"
 )
 
+// Constants for logger levels
+const (
+	INFO  string = "INFO"
+	WARN  string = "WARN"
+	ERROR string = "ERROR"
+	FATAL string = "FATAL"
+)
+
 /*This file includes the data structures used in the config file and to parse them*/
 
 type Ports struct {
@@ -13,10 +21,10 @@ type Ports struct {
 }
 
 type Logger struct {
-	Level        []string `json:"level"`
-	OutputStd    bool     `json:"output_std"`
-	OutputFile   string   `json:"output_file"`
-	AppendOutput bool     `json:"append_output"`
+	Level        string `json:"level"`
+	OutputStd    bool   `json:"output_std"`
+	OutputFile   string `json:"output_file"`
+	AppendOutput bool   `json:"append_output"`
 }
 
 type Handler struct {
@@ -42,6 +50,7 @@ type Security struct {
 
 type Config struct {
 	Ports        Ports        `json:"ports"`
+	Logger       Logger       `json:"logger"`
 	Handler      Handler      `json:"handler"`
 	ReverseProxy ReverseProxy `json:"reverse_proxy"`
 	Security     Security     `json:"security"`
