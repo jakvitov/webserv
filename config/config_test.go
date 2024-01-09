@@ -8,11 +8,17 @@ import (
 )
 
 const inputCorrectConfigPath string = "../test/config/correct_simple_config.yaml"
+const inputErrorConfigPath string = "../test/config/error_config.yaml"
 
 func TestReadConfigCoorect(t *testing.T) {
-	inputConfigPath := inputCorrectConfigPath
-	conf, err := config.ReadConfig(inputConfigPath)
+	conf, err := config.ReadConfig(inputCorrectConfigPath)
 	assert.NilError(t, err)
 	assert.Check(t, conf.Logger.Level == "INFO")
 	assert.Check(t, conf.Ports.HttpPort == 80)
+}
+
+func TestReadWrongConfig(t *testing.T) {
+	conf, err := config.ReadConfig(inputErrorConfigPath)
+	assert.Check(t, err != nil)
+	assert.Check(t, conf == nil)
 }

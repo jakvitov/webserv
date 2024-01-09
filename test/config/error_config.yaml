@@ -1,0 +1,11 @@
+ports:
+  http_port: o
+
+logger:
+  level: IN
+  output_std: 121
+  output_file: "./test_logfile.log"
+  append_output: true
+
+handler:
+  content_root: "../test/web_content/deeper_webpage"
