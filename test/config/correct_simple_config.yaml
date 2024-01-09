@@ -1,0 +1,11 @@
+ports:
+  http_port: 80
+
+logger:
+  level: INFO
+  output_std: true
+  output_file: "./test_logfile.log"
+  append_output: true
+
+handler:
+  content_root: "../test/web_content/deeper_webpage"

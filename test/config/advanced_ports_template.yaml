@@ -1,0 +1,26 @@
+ports:
+  http_port: 80
+  https_port: 22
+
+logger:
+  level: [INFO, WARN, ERROR, FATAL]
+  output_to_file: true
+  output_file: ""
+  append_output: true
+
+handler:
+  content_root: ""
+  read_timeout_ms: ""
+  write_timeout_ms: ""
+  max_header_bytes: ""
+
+reverse_proxy:
+  routes:
+    - from: "/api/*"
+    - to: 8080
+    - from: "/manage/*"
+    - to: 8080
+
+security: 
+  cert_path: "./.env/certificate.cert"
+  spam_filter: false

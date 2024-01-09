@@ -18,6 +18,7 @@ func (c *ConfigParseError) AppendOrCreate(input string) *ConfigParseError {
 	} else {
 		c.AddMissingField(input)
 	}
+	return c
 }
 
 func (c *ConfigParseError) AddMissingField(name string) {

@@ -1,6 +1,7 @@
 package sharedlogger
 
 import (
+	"cz/jakvitov/webserv/config"
 	"fmt"
 	"io"
 	"log"
@@ -20,10 +21,11 @@ and allow logging trough simple methods
 type SharedLogger struct {
 	infoLogger  *log.Logger
 	errorLogger *log.Logger
+	level       string
 }
 
 // The output file streams are to print out to multiple files as well as stdio
-func SharedLoggerInit(outputFileStream *os.File) *SharedLogger {
+func SharedLoggerInit(outputFileStream *os.File, cnf *config.Config) *SharedLogger {
 	res := &SharedLogger{}
 	if outputFileStream == nil {
 		res.infoLogger = log.New(io.MultiWriter(os.Stdout), "", 0)
@@ -32,6 +34,7 @@ func SharedLoggerInit(outputFileStream *os.File) *SharedLogger {
 		res.infoLogger = log.New(io.MultiWriter(os.Stdout, outputFileStream), "", 0)
 		res.errorLogger = log.New(io.MultiWriter(os.Stderr, outputFileStream), "", 0)
 	}
+	res.level = cnf.Logger.Level
 	return res
 }
 
@@ -42,20 +45,28 @@ func getDateTimeLogPrefix() string {
 
 // Simple print to stdout and other streams
 func (s *SharedLogger) Info(message string) {
-	s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), message)
+	if s.level == config.INFO {
+		s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), message)
+	}
 }
 
 func (s *SharedLogger) Finfo(input string, args ...any) {
-	s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), fmt.Sprintf(input, args...))
+	if s.level == config.INFO {
+		s.infoLogger.Printf("%s;%s;%s\n", INFO_PREFIX, getDateTimeLogPrefix(), fmt.Sprintf(input, args...))
+	}
 }
 
 func (s *SharedLogger) Warn(message string) {
-	s.infoLogger.Printf("%s;%s;%s\n", WARN_PREFIX, getDateTimeLogPrefix(), message)
+	if s.level == config.INFO || s.level == config.WARN {
+		s.infoLogger.Printf("%s;%s;%s\n", WARN_PREFIX, getDateTimeLogPrefix(), message)
+	}
 }
 
 // Not followed by any other action than log
 func (s *SharedLogger) Error(message string) {
-	s.errorLogger.Printf("%s;%s;%s\n", ERROR_PREFIX, getDateTimeLogPrefix(), message)
+	if s.level == config.INFO || s.level == config.WARN || s.level == config.ERROR {
+		s.errorLogger.Printf("%s;%s;%s\n", ERROR_PREFIX, getDateTimeLogPrefix(), message)
+	}
 }
 
 // Followed by os.Exit(1) syscall call

@@ -20,42 +20,47 @@ const ERROR_LOG_PREFIX string = "WEBSERV_SERVER [ERROR]:"
 
 // Crentral struct holding info about all the http listeners and config
 type Server struct {
-	cnf         *config.WebserverConfig
-	httpServers []*http.Server
+	cnf         *config.Config
+	httpServer  *http.Server
+	httpsServer *http.Server
 	logger      *sharedlogger.SharedLogger
 }
 
-func initHttpServers(cnf *config.WebserverConfig, logger *sharedlogger.SharedLogger) []*http.Server {
-	res := make([]*http.Server, len(cnf.Ports))
-	for i, port := range cnf.Ports {
-		res[i] = &http.Server{
-			Addr:           fmt.Sprintf(":%d", port),
-			Handler:        HttpRequestHandlerInit(logger, cnf.RootDir),
-			ReadTimeout:    1 * time.Second,
-			WriteTimeout:   1 * time.Second,
-			MaxHeaderBytes: 1 << 20,
-		}
+func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http.Server {
+	logger.Finfo("Creating http server for port [%d]\n", cnf.Ports.HttpPort)
+
+	return &http.Server{
+		Addr:           fmt.Sprintf(":%d", cnf.Ports.HttpPort),
+		Handler:        HttpRequestHandlerInit(logger, cnf.Handler.ContentRoot),
+		ReadTimeout:    time.Duration(cnf.Handler.ReadTimeout) * time.Millisecond,
+		WriteTimeout:   time.Duration(cnf.Handler.WriteTimeout) * time.Millisecond,
+		MaxHeaderBytes: cnf.Handler.MaxHeaderBytes,
 	}
-	return res
 }
 
-func ServerInit(inputCnf *config.WebserverConfig) *Server {
-	//Open as create or append
-	writer, err := os.OpenFile(inputCnf.LogDest, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		fmt.Printf("Error opening log file [%s], creating one instead.\n", inputCnf.LogDest)
-		writerC, err := os.Create(inputCnf.LogDest)
+func ServerInit(inputCnf *config.Config) *Server {
+	var lg *sharedlogger.SharedLogger
+	if inputCnf.Logger.OutputToFile {
+		//Open as create or append
+		writer, err := os.OpenFile(inputCnf.Logger.OutputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
-			panic(fmt.Sprintf("Error while creating a log file: [%s]\n", err.Error()))
+			fmt.Printf("Error opening log file [%s], creating one instead.\n", inputCnf.Logger.OutputFile)
+			writerC, err := os.Create(inputCnf.Logger.OutputFile)
+			if err != nil {
+				panic(fmt.Sprintf("Error while creating a log file: [%s]\n", err.Error()))
+			}
+			writer = writerC
+			lg = sharedlogger.SharedLoggerInit(writer, inputCnf)
+		} else {
+			//User chose not to log into a file => only std
+			//WE pass nil as file stream ptr and indicate to logger, that we want only std
+			lg = sharedlogger.SharedLoggerInit(nil, inputCnf)
 		}
-		writer = writerC
 	}
-
-	lg := sharedlogger.SharedLoggerInit(writer)
 	srv := &Server{
-		cnf:         inputCnf,
-		logger:      lg,
-		httpServers: initHttpServers(inputCnf, lg),
+		cnf:        inputCnf,
+		logger:     lg,
+		httpServer: initHttpServer(inputCnf, lg),
 	}
 	return srv
 }

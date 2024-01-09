@@ -7,19 +7,12 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-const inputCorrectConfigPath string = "../test/config/config_correct.json"
-const inputMissingConfigPath string = "../test/config/config_incorrect.json"
+const inputCorrectConfigPath string = "../test/config/correct_simple_config.yaml"
 
 func TestReadConfigCoorect(t *testing.T) {
 	inputConfigPath := inputCorrectConfigPath
 	conf, err := config.ReadConfig(inputConfigPath)
 	assert.NilError(t, err)
-	assert.Check(t, len(conf.LogDest) != 0)
-	assert.Check(t, len(conf.Ports) != 0)
-	assert.Check(t, len(conf.RootDir) != 0)
-}
-
-func TestReadConfigIncorrect(t *testing.T) {
-	_, err := config.ReadConfig(inputMissingConfigPath)
-	assert.Check(t, err != nil)
+	assert.Check(t, conf.Logger.Level == "INFO")
+	assert.Check(t, conf.Ports.HttpPort == 80)
 }

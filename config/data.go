@@ -1,8 +1,9 @@
 package config
 
 import (
-	"encoding/json"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Constants for logger levels
@@ -16,44 +17,44 @@ const (
 /*This file includes the data structures used in the config file and to parse them*/
 
 type Ports struct {
-	HttpPort  int `json:"http_port"`
-	HttpsPort int `json:"https_port"`
+	HttpPort  int `yaml:"http_port"`
+	HttpsPort int `yaml:"https_port"`
 }
 
 type Logger struct {
-	Level        string `json:"level"`
-	OutputStd    bool   `json:"output_std"`
-	OutputFile   string `json:"output_file"`
-	AppendOutput bool   `json:"append_output"`
+	Level        string `yaml:"level"`
+	OutputToFile bool   `yaml:"output_to_file"`
+	OutputFile   string `yaml:"output_file"`
+	AppendOutput bool   `yaml:"append_output"`
 }
 
 type Handler struct {
-	ContentRoot    string `json:"content_root"`
-	ReadTimeout    int    `json:"read_timeout"`
-	WriteTimeout   int    `json:"write_timeout"`
-	MaxHeaderBytes int    `json:"max_header_bytes"`
+	ContentRoot    string `yaml:"content_root"`
+	ReadTimeout    int    `yaml:"read_timeout"`
+	WriteTimeout   int    `yaml:"write_timeout"`
+	MaxHeaderBytes int    `yaml:"max_header_bytes"`
 }
 
 type Route struct {
-	From string `json:"from"`
-	To   int    `json:"to"`
+	From string `yaml:"from"`
+	To   int    `yaml:"to"`
 }
 
 type ReverseProxy struct {
-	Routes []Route `json:"routes"`
+	Routes []Route `yaml:"routes"`
 }
 
 type Security struct {
-	CertPath   string `json:"cert_path"`
-	SpamFilter bool   `json:"spam_filter"`
+	CertPath   string `yaml:"cert_path"`
+	SpamFilter bool   `yaml:"spam_filter"`
 }
 
 type Config struct {
-	Ports        Ports        `json:"ports"`
-	Logger       Logger       `json:"logger"`
-	Handler      Handler      `json:"handler"`
-	ReverseProxy ReverseProxy `json:"reverse_proxy"`
-	Security     Security     `json:"security"`
+	Ports        Ports        `yaml:"ports"`
+	Logger       Logger       `yaml:"logger"`
+	Handler      Handler      `yaml:"handler"`
+	ReverseProxy ReverseProxy `yaml:"reverse_proxy"`
+	Security     Security     `yaml:"security"`
 }
 
 // Function used to parse input config into a data structure
@@ -63,7 +64,7 @@ func DecodeConfig(path string) (*Config, error) {
 		return nil, err
 	}
 	res := &Config{}
-	if err := json.Unmarshal(data, &res); err != nil {
+	if err := yaml.Unmarshal(data, &res); err != nil {
 		return nil, err
 	}
 	return res, nil

@@ -1,5 +1,0 @@
-{
-    "ports":[3000],
-    "content_root":"../test/web_content/deeper_webpage",
-    "log_dest":"test_logfile.log"
-}

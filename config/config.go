@@ -2,9 +2,15 @@ package config
 
 import (
 	"cz/jakvitov/webserv/err"
-	"encoding/json"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
+
+// Defaults for missing values in the config
+const READ_TIMEOUT_MS_DEFAULT int = 1000
+const WRITE_TIMEOUT_MS_DEFAULT int = 1000
+const MAX_HEADER_BYTES_DEFAULT int = 1 << 20
 
 // Given a path, return a ptr to a read and parsed Webserver config
 // Return err if not found
@@ -14,7 +20,7 @@ func ReadConfig(filePath string) (*Config, error) {
 		return nil, err
 	}
 	res := &Config{}
-	if err := json.Unmarshal(data, &res); err != nil {
+	if err := yaml.Unmarshal(data, &res); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -39,7 +45,20 @@ func verifyConfig(cnf *Config) *err.ConfigParseError {
 	var e *err.ConfigParseError = nil
 	verifyPorts(&cnf.Ports, e)
 	verifyLogger(&cnf.Logger, e)
+	verifyHanlder(&cnf.Handler)
 	return e
+}
+
+func verifyHanlder(hd *Handler) {
+	if hd.MaxHeaderBytes == 0 {
+		hd.MaxHeaderBytes = MAX_HEADER_BYTES_DEFAULT
+	}
+	if hd.ReadTimeout == 0 {
+		hd.ReadTimeout = READ_TIMEOUT_MS_DEFAULT
+	}
+	if hd.WriteTimeout == 0 {
+		hd.WriteTimeout = WRITE_TIMEOUT_MS_DEFAULT
+	}
 }
 
 func ReadAndVerify(path string) (*Config, error) {
