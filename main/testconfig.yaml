@@ -1,11 +1,11 @@
 ports:
-  http_port: 8080
+  http_port: 3000
 
 logger:
   level: INFO
-  output_to_file: true
+  output_std: true
   output_file: "./test_logfile.log"
   append_output: true
 
 handler:
-  content_root: "../test/web_content/only_index_webpage"
+  content_root: "../test/web_content/deeper_webpage"

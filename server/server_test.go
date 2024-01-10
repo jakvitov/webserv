@@ -14,11 +14,11 @@ import (
 )
 
 // Serves only index simple webpage
-const CORRECT_CONFIG string = "../test/config/config_correct.json"
-
-const LOCALHOST_3000 string = "http://localhost:3000/"
+const LOCALHOST_URL string = "http://localhost:8080/"
 
 const ONLY_INDEX_FILE string = "../test/web_content/only_index_webpage/index.html"
+
+const CORRECT_CONFIG string = "../test/config/correct_simple_config.yaml"
 
 func TestServerInit(t *testing.T) {
 	wg := new(sync.WaitGroup)
@@ -31,7 +31,7 @@ func TestServerInit(t *testing.T) {
 
 	//We give the server 200 ms to initialize
 	t.Logf("Sending a get request.\n")
-	res, err := http.Get(LOCALHOST_3000)
+	res, err := http.Get(LOCALHOST_URL)
 	assert.NilError(t, err)
 	defer res.Body.Close()
 	assert.Check(t, res != nil)
@@ -49,7 +49,7 @@ func TestServerOnlyIndexWebpage(t *testing.T) {
 	//Let the server load properly
 	time.Sleep(50 * time.Microsecond)
 
-	res, err := http.Get(LOCALHOST_3000)
+	res, err := http.Get(LOCALHOST_URL)
 	assert.NilError(t, err)
 	expected, err := os.ReadFile(ONLY_INDEX_FILE)
 	assert.NilError(t, err)

@@ -50,12 +50,12 @@ func ServerInit(inputCnf *config.Config) *Server {
 				panic(fmt.Sprintf("Error while creating a log file: [%s]\n", err.Error()))
 			}
 			writer = writerC
-			lg = sharedlogger.SharedLoggerInit(writer, inputCnf)
-		} else {
-			//User chose not to log into a file => only std
-			//WE pass nil as file stream ptr and indicate to logger, that we want only std
-			lg = sharedlogger.SharedLoggerInit(nil, inputCnf)
 		}
+		lg = sharedlogger.SharedLoggerInit(writer, inputCnf)
+	} else {
+		//User chose not to log into a file => only std
+		//WE pass nil as file stream ptr and indicate to logger, that we want only std
+		lg = sharedlogger.SharedLoggerInit(nil, inputCnf)
 	}
 	srv := &Server{
 		cnf:        inputCnf,
@@ -68,25 +68,21 @@ func ServerInit(inputCnf *config.Config) *Server {
 func (s *Server) StartListening(wg *sync.WaitGroup) {
 	s.ListenForSigterm()
 	static.PrintBannerDecoration(s.logger)
-	for _, srv := range s.httpServers {
-		wg.Add(1)
-		go func(s *Server, srv *http.Server) {
-			s.logger.Finfo("Starting listener on port [%s]\n", srv.Addr)
-			err := srv.ListenAndServe()
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				s.logger.Fatal(err.Error())
-			}
-			defer wg.Done()
-		}(s, srv)
-	}
+	wg.Add(1)
+	go func(s *Server, srv *http.Server) {
+		s.logger.Finfo("Starting listener on port [%s]\n", srv.Addr)
+		err := srv.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.logger.Fatal(err.Error())
+		}
+		defer wg.Done()
+	}(s, s.httpServer)
 }
 
 // Force quit all listening servers
 func (s *Server) Shutdown() {
-	for _, srv := range s.httpServers {
-		if err := srv.Shutdown(context.Background()); err != nil {
-			s.logger.Error(err.Error())
-		}
+	if err := s.httpServer.Shutdown(context.Background()); err != nil {
+		s.logger.Error(err.Error())
 	}
 }
 

@@ -14,7 +14,7 @@ func TestReadConfigCoorect(t *testing.T) {
 	conf, err := config.ReadConfig(inputCorrectConfigPath)
 	assert.NilError(t, err)
 	assert.Check(t, conf.Logger.Level == "INFO")
-	assert.Check(t, conf.Ports.HttpPort == 80)
+	assert.Check(t, conf.Ports.HttpPort == 8080)
 }
 
 func TestReadWrongConfig(t *testing.T) {
