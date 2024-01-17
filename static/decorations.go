@@ -11,7 +11,9 @@ func printBanner(lg *sharedlogger.SharedLogger) *error {
 	if err != nil {
 		return &err
 	}
-	lg.Info(string(banner))
+
+	bnr := "\033[96m" + string(banner) + "\033[0m"
+	lg.Info(string(bnr))
 	return nil
 }
 
