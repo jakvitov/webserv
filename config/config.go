@@ -12,6 +12,28 @@ const READ_TIMEOUT_MS_DEFAULT int = 1000
 const WRITE_TIMEOUT_MS_DEFAULT int = 1000
 const MAX_HEADER_BYTES_DEFAULT int = 1 << 20
 
+const DEFAULT_HTTP_PORT int = 8080
+const DEFAULT_LOG_LEVEL string = "INFO"
+const OUTPUT_TO_FILE_DEFAULT bool = true
+const OUTPUT_FILE_DEFAULT string = "./websersv_log.log"
+const APPEND_OUTPUT_DEFAULT bool = false
+
+// Return pointer to a preset config with default values
+func getDefaultConfig() *Config {
+	res := &Config{
+		Ports: Ports{
+			HttpPort: DEFAULT_HTTP_PORT,
+		},
+		Logger: Logger{
+			Level:        DEFAULT_LOG_LEVEL,
+			OutputToFile: OUTPUT_TO_FILE_DEFAULT,
+			OutputFile:   OUTPUT_FILE_DEFAULT,
+			AppendOutput: APPEND_OUTPUT_DEFAULT,
+		},
+	}
+	return res
+}
+
 // Given a path, return a ptr to a read and parsed Webserver config
 // Return err if not found
 func ReadConfig(filePath string) (*Config, error) {
@@ -19,7 +41,8 @@ func ReadConfig(filePath string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := &Config{}
+	//Default config values
+	res := getDefaultConfig()
 	if err := yaml.Unmarshal(data, &res); err != nil {
 		return nil, err
 	}
