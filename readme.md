@@ -26,6 +26,9 @@ handler:
   read_timeout_ms: int
   write_timeout_ms: int
   max_header_bytes: int
+  cache_enabled: bool
+  //If cache is enabled and this is 0 or not set, we default to 20MB
+  max_cache_bytes: int64
 
 reverse_proxy:
   routes:

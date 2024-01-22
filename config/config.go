@@ -18,6 +18,8 @@ const OUTPUT_TO_FILE_DEFAULT bool = true
 const OUTPUT_FILE_DEFAULT string = "./websersv_log.log"
 const APPEND_OUTPUT_DEFAULT bool = false
 
+const DEFAULT_CACHE_SIZE int64 = 20 * 1000 * 1000
+
 // Return pointer to a preset config with default values
 func getDefaultConfig() *Config {
 	res := &Config{
@@ -86,7 +88,7 @@ func verifyHanlder(hd *Handler) {
 		hd.WriteTimeout = WRITE_TIMEOUT_MS_DEFAULT
 	}
 	if hd.CacheEnabled == true && hd.MaxCacheSize == 0 {
-		hd.MaxCacheSize = 100000 * 1000
+		hd.MaxCacheSize = DEFAULT_CACHE_SIZE
 	}
 }
 
