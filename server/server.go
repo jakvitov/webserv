@@ -24,7 +24,9 @@ type Server struct {
 	cnf         *config.Config
 	httpServer  *http.Server
 	httpsServer *http.Server
-	logger      *sharedlogger.SharedLogger
+	//Lookup map for reverse proxy fast lookups
+	reverseProxyMap map[string]int
+	logger          *sharedlogger.SharedLogger
 }
 
 func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http.Server {
@@ -63,9 +65,10 @@ func ServerInit(inputCnf *config.Config) *Server {
 		lg = sharedlogger.SharedLoggerInit(nil, inputCnf)
 	}
 	srv := &Server{
-		cnf:        inputCnf,
-		logger:     lg,
-		httpServer: initHttpServer(inputCnf, lg),
+		cnf:             inputCnf,
+		logger:          lg,
+		httpServer:      initHttpServer(inputCnf, lg),
+		reverseProxyMap: inputCnf.ParseProxyMap(),
 	}
 	return srv
 }

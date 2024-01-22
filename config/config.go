@@ -103,3 +103,12 @@ func ReadAndVerify(path string) (*Config, error) {
 	}
 	return cnf, nil
 }
+
+// Creation of reverse proxy map for fast lookup of forwarding requests
+func (c *Config) ParseProxyMap() map[string]int {
+	res := make(map[string]int)
+	for _, route := range c.ReverseProxy.Routes {
+		res[route.From] = route.To
+	}
+	return res
+}

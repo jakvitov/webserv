@@ -68,3 +68,11 @@ handler:
   max_cache_bytes: 20 * 1000 * 1000
 
 ```
+
+# Todo
+- Help man page
+- Reverse proxy routing
+- Spam filter
+- Load testing
+- Cache rebalance atomicity
+- Write documentation
