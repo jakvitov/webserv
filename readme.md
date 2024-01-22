@@ -64,5 +64,7 @@ handler:
   read_timeout_ms: 1000
   write_timeout_ms: 1000
   max_header_bytes: 1 << 20
+  cache_enabled: false
+  max_cache_bytes: 20 * 1000 * 1000
 
 ```
