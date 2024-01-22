@@ -1,2 +1,2 @@
 handler:
-  content_root: "../web_content/deeper_webpage"
+  content_root: "../test/web_content/only_index_webpage"
