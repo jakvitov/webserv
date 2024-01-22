@@ -33,6 +33,8 @@ type Handler struct {
 	ReadTimeout    int    `yaml:"read_timeout"`
 	WriteTimeout   int    `yaml:"write_timeout"`
 	MaxHeaderBytes int    `yaml:"max_header_bytes"`
+	CacheEnabled   bool   `yaml:"cache_enabled"`
+	MaxCacheSize   int64  `yaml:"max_cache_bytes"`
 }
 
 type Route struct {

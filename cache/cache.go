@@ -12,10 +12,11 @@ type Cache struct {
 	files     map[string]*CachedFile
 	maxBytes  int64
 	totalSize int64
-	mutex     sync.Mutex
-	locked    bool
-	logger    *sharedlogger.SharedLogger
-	enabled   bool
+	//Lock for rebalance
+	mutex   sync.Mutex
+	locked  bool
+	logger  *sharedlogger.SharedLogger
+	enabled bool
 }
 
 // Create new empty cache with max size

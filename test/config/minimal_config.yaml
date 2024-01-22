@@ -1,2 +1,3 @@
 handler:
   content_root: "../test/web_content/only_index_webpage"
+  cache_enabled: true

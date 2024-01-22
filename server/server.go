@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"cz/jakvitov/webserv/cache"
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/sharedlogger"
 	"cz/jakvitov/webserv/static"
@@ -28,10 +29,14 @@ type Server struct {
 
 func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http.Server {
 	logger.Finfo("Creating http server for port [%d]\n", cnf.Ports.HttpPort)
+	cache := cache.CacheInit(cnf.Handler.MaxCacheSize, cnf.Handler.CacheEnabled, logger)
+	if cnf.Handler.CacheEnabled {
+		logger.Finfo("Created server cache with max size of [%d] bytes.\n", cnf.Handler.MaxCacheSize)
+	}
 
 	return &http.Server{
 		Addr:           fmt.Sprintf(":%d", cnf.Ports.HttpPort),
-		Handler:        HttpRequestHandlerInit(logger, cnf.Handler.ContentRoot),
+		Handler:        HttpRequestHandlerInit(logger, cnf.Handler.ContentRoot, cache),
 		ReadTimeout:    time.Duration(cnf.Handler.ReadTimeout) * time.Millisecond,
 		WriteTimeout:   time.Duration(cnf.Handler.WriteTimeout) * time.Millisecond,
 		MaxHeaderBytes: cnf.Handler.MaxHeaderBytes,

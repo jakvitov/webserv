@@ -64,11 +64,14 @@ func verifyLogger(lg *Logger, e *err.ConfigParseError) {
 
 // Verify the given config and return possible errors
 // Else return nil
-func verifyConfig(cnf *Config) *err.ConfigParseError {
+func verifyConfig(cnf *Config) error {
 	var e *err.ConfigParseError = nil
 	verifyPorts(&cnf.Ports, e)
 	verifyLogger(&cnf.Logger, e)
 	verifyHanlder(&cnf.Handler)
+	if e == nil {
+		return nil
+	}
 	return e
 }
 
@@ -81,6 +84,9 @@ func verifyHanlder(hd *Handler) {
 	}
 	if hd.WriteTimeout == 0 {
 		hd.WriteTimeout = WRITE_TIMEOUT_MS_DEFAULT
+	}
+	if hd.CacheEnabled == true && hd.MaxCacheSize == 0 {
+		hd.MaxCacheSize = 100000 * 1000
 	}
 }
 

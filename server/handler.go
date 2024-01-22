@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cz/jakvitov/webserv/cache"
 	"cz/jakvitov/webserv/sharedlogger"
 	"fmt"
 	"net/http"
@@ -18,6 +19,7 @@ type HttpRequestHandler struct {
 	mux    *http.ServeMux
 	logger *sharedlogger.SharedLogger
 	root   string
+	cache  *cache.Cache
 }
 
 func (h *HttpRequestHandler) badRequest(w http.ResponseWriter, uuid string) {
@@ -59,12 +61,13 @@ func (h *HttpRequestHandler) registerHandlers() {
 	h.mux.Handle("/", h)
 }
 
-func HttpRequestHandlerInit(il *sharedlogger.SharedLogger, root string) *HttpRequestHandler {
+func HttpRequestHandlerInit(il *sharedlogger.SharedLogger, root string, cache *cache.Cache) *HttpRequestHandler {
 	mux := http.NewServeMux()
 	res := &HttpRequestHandler{
 		mux:    mux,
 		logger: il,
 		root:   root,
+		cache:  cache,
 	}
 	//Register handlers
 	res.registerHandlers()

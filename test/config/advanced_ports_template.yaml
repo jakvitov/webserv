@@ -13,6 +13,7 @@ handler:
   read_timeout_ms: ""
   write_timeout_ms: ""
   max_header_bytes: ""
+  cache_enabled: true
 
 reverse_proxy:
   routes:
