@@ -24,6 +24,15 @@ type SharedLogger struct {
 	level       string
 }
 
+// Return shared logger used in tests, that just prints to the standard output
+func TestingSharedLoggerInit() *SharedLogger {
+	return &SharedLogger{
+		infoLogger:  log.New(io.MultiWriter(os.Stdout), "", 0),
+		errorLogger: log.New(io.MultiWriter(os.Stderr), "", 0),
+		level:       "INFO",
+	}
+}
+
 // The output file streams are to print out to multiple files as well as stdio
 func SharedLoggerInit(outputFileStream *os.File, cnf *config.Config) *SharedLogger {
 	res := &SharedLogger{}
