@@ -26,9 +26,15 @@ func CacheInit(max int64, enabled bool, logger *sharedlogger.SharedLogger) *Cach
 		maxBytes:  max,
 		totalSize: 0,
 		logger:    logger,
-		locked:    true,
+		locked:    false,
 		enabled:   enabled,
 	}
+}
+
+func (c *Cache) encache(cf *CachedFile) {
+	c.logger.Finfo("Cached file [%s]\n", cf.GetPath())
+	c.totalSize += cf.GetSize()
+	c.files[cf.GetPath()] = cf
 }
 
 func (c *Cache) addOrRebalance(cf *CachedFile) {
@@ -39,8 +45,7 @@ func (c *Cache) addOrRebalance(cf *CachedFile) {
 
 	//We have free space to accomoddate this file
 	if cf.GetSize() <= c.maxBytes-c.totalSize {
-		c.files[cf.GetPath()] = cf
-		c.totalSize += cf.GetSize()
+		c.encache(cf)
 		return
 	}
 
@@ -60,7 +65,7 @@ func (c *Cache) addOrRebalance(cf *CachedFile) {
 	}
 
 	//Now we have made the space required for the new file
-	c.files[cf.path] = cf
+	c.encache(cf)
 	return
 }
 

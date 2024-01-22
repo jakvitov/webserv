@@ -5,7 +5,6 @@ import (
 	"cz/jakvitov/webserv/sharedlogger"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/google/uuid"
 )
@@ -48,7 +47,7 @@ func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if path == "/" {
 		path = "index.html"
 	}
-	file, err := os.ReadFile(fmt.Sprintf("%s/%s", h.root, path))
+	file, err := h.cache.Get(fmt.Sprintf("%s/%s", h.root, path))
 	if err != nil {
 		h.notFound(w, uuid)
 		return
