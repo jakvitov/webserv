@@ -15,7 +15,7 @@ func main() {
 		return
 	}
 	path := os.Args[1]
-	cnf, readErr := config.ReadConfig(path)
+	cnf, readErr := config.ReadAndVerify(path)
 	if readErr != nil {
 		err.ErrorPrompt(fmt.Sprintf("Cannot setup config. %s\n", readErr.Error()))
 		return
