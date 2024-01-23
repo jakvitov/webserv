@@ -4,6 +4,7 @@ import (
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/sharedlogger"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -47,11 +48,29 @@ func (p *ProxyHandler) handleHeaders(r *http.Request, target string) {
 	r.Header.Add(FORWARDED, r.RemoteAddr)
 }
 
+// Handle the response from the proxy call and return it to the caller
+func (p *ProxyHandler) handleResponse(r *http.Response, w http.ResponseWriter, errorCallback func(w http.ResponseWriter, uuid string), uuid string) {
+	//todo construct response from the resp and we should be good to go
+	res, err := io.ReadAll(r.Body)
+	if err != nil {
+		errorCallback(w, uuid)
+		return
+	}
+	for key, val := range r.Header {
+		for _, v := range val {
+			w.Header().Add(key, v)
+		}
+	}
+	w.WriteHeader(r.StatusCode)
+	w.Write(res)
+	return
+}
+
 // Proxy the current request to the given port on the localhost
-func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, errorCallback func()) {
+func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, errorCallback func(w http.ResponseWriter, uuid string), uuid string) {
 	port, found := p.proxyMap[r.URL.Path]
 	if !found {
-		p.logger.Error("Not found proxy port for url " + r.URL.Path + ".")
+		p.logger.Ferror("Not found proxy port for url %s.", r.URL.Path)
 		return
 	}
 	//Construction of the redirection url path
@@ -60,9 +79,7 @@ func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, erro
 	client := &http.Client{}
 	resp, err := client.Do(r)
 	if err != nil {
-		errorCallback()
+		errorCallback(w, uuid)
 	}
-
-	//todo construct response from the resp and we should be good to go
-
+	p.handleResponse(resp, w, errorCallback, uuid)
 }

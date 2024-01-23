@@ -55,7 +55,7 @@ func (h *HttpRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	//If the request is proxied, handle it
 	if h.proxyHandler.IsProxied(r) {
-		h.proxyHandler.ProxyRequest(r, w, h.badRequest)
+		h.proxyHandler.ProxyRequest(r, w, h.badRequest, uuid)
 		return
 	}
 	//Route to index on base path

@@ -38,7 +38,7 @@ func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http
 
 	return &http.Server{
 		Addr:           fmt.Sprintf(":%d", cnf.Ports.HttpPort),
-		Handler:        HttpRequestHandlerInit(logger, cnf.Handler.ContentRoot, cache),
+		Handler:        HttpRequestHandlerInit(logger, cnf, cache),
 		ReadTimeout:    time.Duration(cnf.Handler.ReadTimeout) * time.Millisecond,
 		WriteTimeout:   time.Duration(cnf.Handler.WriteTimeout) * time.Millisecond,
 		MaxHeaderBytes: cnf.Handler.MaxHeaderBytes,
