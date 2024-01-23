@@ -74,7 +74,7 @@ func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, erro
 		return
 	}
 	//Construction of the redirection url path
-	url := fmt.Sprintf("%s:%s/%s", LOCALHOST, port, r.URL.Path)
+	url := fmt.Sprintf("%s:%d/%s", LOCALHOST, port, r.URL.Path)
 	p.handleHeaders(r, url)
 	client := &http.Client{}
 	resp, err := client.Do(r)
