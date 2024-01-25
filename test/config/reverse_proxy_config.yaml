@@ -1,0 +1,7 @@
+ports:
+  http_port: 3000
+
+reverse_proxy:
+  routes:
+      - from: "/"
+        to: 8080

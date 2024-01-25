@@ -25,15 +25,14 @@ type Server struct {
 	httpServer  *http.Server
 	httpsServer *http.Server
 	//Lookup map for reverse proxy fast lookups
-	reverseProxyMap map[string]int
-	logger          *sharedlogger.SharedLogger
+	logger *sharedlogger.SharedLogger
 }
 
 func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http.Server {
-	logger.Finfo("Creating http server for port [%d]\n", cnf.Ports.HttpPort)
+	logger.Finfo("Creating http server for port [%d]", cnf.Ports.HttpPort)
 	cache := cache.CacheInit(cnf.Handler.MaxCacheSize, cnf.Handler.CacheEnabled, logger)
 	if cnf.Handler.CacheEnabled {
-		logger.Finfo("Created server cache with max size of [%d] bytes.\n", cnf.Handler.MaxCacheSize)
+		logger.Finfo("Created server cache with max size of [%d] bytes.", cnf.Handler.MaxCacheSize)
 	}
 
 	return &http.Server{
@@ -51,10 +50,10 @@ func ServerInit(inputCnf *config.Config) *Server {
 		//Open as create or append
 		writer, err := os.OpenFile(inputCnf.Logger.OutputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
-			fmt.Printf("Error opening log file [%s], creating one instead.\n", inputCnf.Logger.OutputFile)
+			fmt.Printf("Error opening log file [%s], creating one instead.", inputCnf.Logger.OutputFile)
 			writerC, err := os.Create(inputCnf.Logger.OutputFile)
 			if err != nil {
-				panic(fmt.Sprintf("Error while creating a log file: [%s]\n", err.Error()))
+				panic(fmt.Sprintf("Error while creating a log file: [%s]", err.Error()))
 			}
 			writer = writerC
 		}
@@ -65,10 +64,9 @@ func ServerInit(inputCnf *config.Config) *Server {
 		lg = sharedlogger.SharedLoggerInit(nil, inputCnf)
 	}
 	srv := &Server{
-		cnf:             inputCnf,
-		logger:          lg,
-		httpServer:      initHttpServer(inputCnf, lg),
-		reverseProxyMap: inputCnf.ParseProxyMap(),
+		cnf:        inputCnf,
+		logger:     lg,
+		httpServer: initHttpServer(inputCnf, lg),
 	}
 	return srv
 }
@@ -78,7 +76,7 @@ func (s *Server) StartListening(wg *sync.WaitGroup) {
 	static.PrintBannerDecoration(s.logger)
 	wg.Add(1)
 	go func(s *Server, srv *http.Server) {
-		s.logger.Finfo("Starting listener on port [%s]\n", srv.Addr)
+		s.logger.Finfo("Starting listener on port [%s]", srv.Addr)
 		err := srv.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.logger.Fatal(err.Error())

@@ -21,6 +21,7 @@ func ProxyHandlerInit(conf *config.ReverseProxy, logger *sharedlogger.SharedLogg
 	pmap := make(map[string]int)
 	for _, rprox := range conf.Routes {
 		pmap[rprox.From] = rprox.To
+		logger.Finfo("Registered proxy from [%s] -> [:%d]", rprox.From, rprox.To)
 	}
 	return &ProxyHandler{
 		proxyMap: pmap,
@@ -63,7 +64,6 @@ func (p *ProxyHandler) handleResponse(r *http.Response, w http.ResponseWriter, e
 	}
 	w.WriteHeader(r.StatusCode)
 	w.Write(res)
-	return
 }
 
 // Proxy the current request to the given port on the localhost
