@@ -18,32 +18,65 @@ const FORWARDED string = "X-Forwarded-For"
 
 // Runs the server from the given config
 func startServer(t *testing.T, path string) (*server.Server, *sync.WaitGroup) {
-	wg := new(sync.WaitGroup)
 	cnf, err := config.ReadConfig(path)
 	assert.NilError(t, err)
 	srv := server.ServerInit(cnf)
-	srv.StartListening(wg)
+	wg := srv.StartListening()
 	//Let the server load properly
-	time.Sleep(50 * time.Microsecond)
+	time.Sleep(100 * time.Millisecond)
 	return srv, wg
 }
 
 // Test the reverse proxy functionality
 func TestProxy(t *testing.T) {
+	//Channels for concurrency orchestration
+	sdnormal := make(chan bool, 1)
+	sdproxy := make(chan bool, 1)
+	waitchan := make(chan int, 2)
 	//Start server
-	basicSrv, basicWg := startServer(t, BASIC_SERVER_PATH)
-	proxySrv, proxyWg := startServer(t, REVERSE_PROXY_CONFIG)
-	defer func() {
-		basicSrv.Shutdown()
-		proxySrv.Shutdown()
+	go func(sdchan chan bool, waitchan chan int) {
+		basicSrv, basicWg := startServer(t, BASIC_SERVER_PATH)
 		basicWg.Wait()
-		proxyWg.Wait()
-	}()
+		waitchan <- 1
+		shutdown := <-sdchan
+		if shutdown {
+			basicSrv.Shutdown()
+			waitchan <- 1
+		}
+	}(sdnormal, waitchan)
 
-	res, err := http.Get(LOCALHOST_URL)
+	go func(sdchan chan bool, waitchan chan int) {
+		proxySrv, proxyWg := startServer(t, REVERSE_PROXY_CONFIG)
+		proxyWg.Wait()
+		waitchan <- 1
+		shutdown := <-sdchan
+		if shutdown {
+			proxySrv.Shutdown()
+			waitchan <- 1
+		}
+	}(sdproxy, waitchan)
+
+	//Wait for both servers to start
+	ready := 0
+	for ready != 2 {
+		sig := <-waitchan
+		ready += sig
+	}
+
+	//Test the response
+	res, err := http.Get(URL)
 	assert.NilError(t, err)
 	forwarded, found := res.Header[FORWARDED]
 	assert.Equal(t, found, true)
 	assert.Assert(t, len(forwarded) > 0)
+
+	//Shutdown the
+	sdnormal <- true
+	sdproxy <- true
+	ready = 0
+	for ready != 2 {
+		sig := <-waitchan
+		ready += sig
+	}
 
 }

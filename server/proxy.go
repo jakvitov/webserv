@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 const LOCALHOST string = "http://localhost"
@@ -36,7 +38,7 @@ func (p *ProxyHandler) IsProxied(r *http.Request) bool {
 }
 
 func (p *ProxyHandler) handleHeaders(r *http.Request, target string) {
-	for k, _ := range r.Header {
+	for k := range r.Header {
 		switch k {
 		case "Connection":
 			r.Header[k] = []string{"Upgrade"}
@@ -62,6 +64,8 @@ func (p *ProxyHandler) handleResponse(r *http.Response, w http.ResponseWriter, e
 			w.Header().Add(key, v)
 		}
 	}
+	w.Header().Add(FORWARDED, r.Request.Host)
+	w.Header().Add(FORWARDED_FOR, r.Request.URL.Host)
 	w.WriteHeader(r.StatusCode)
 	w.Write(res)
 }
@@ -74,9 +78,16 @@ func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, erro
 		return
 	}
 	//Construction of the redirection url path
-	url := fmt.Sprintf("%s:%d/%s", LOCALHOST, port, r.URL.Path)
-	p.handleHeaders(r, url)
+	newUrl := fmt.Sprintf("%s:%d/%s", LOCALHOST, port, strings.TrimSuffix(r.URL.Path, "/"))
+	uri, err := url.Parse(newUrl)
+	if err != nil {
+		errorCallback(w, uuid)
+	}
+	p.handleHeaders(r, newUrl)
 	client := &http.Client{}
+	r.RequestURI = ""
+	r.URL = uri
+	r.Host = uri.Host
 	resp, err := client.Do(r)
 	if err != nil {
 		errorCallback(w, uuid)

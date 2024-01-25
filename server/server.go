@@ -71,18 +71,21 @@ func ServerInit(inputCnf *config.Config) *Server {
 	return srv
 }
 
-func (s *Server) StartListening(wg *sync.WaitGroup) {
+// Returns wait group, that is Done as soon as the server is listening on the give  port
+func (s *Server) StartListening() *sync.WaitGroup {
+	wg := new(sync.WaitGroup)
 	s.ListenForSigterm()
 	static.PrintBannerDecoration(s.logger)
 	wg.Add(1)
-	go func(s *Server, srv *http.Server) {
+	go func(s *Server, srv *http.Server, wg *sync.WaitGroup) {
 		s.logger.Finfo("Starting listener on port [%s]", srv.Addr)
+		wg.Done()
 		err := srv.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.logger.Fatal(err.Error())
 		}
-		defer wg.Done()
-	}(s, s.httpServer)
+	}(s, s.httpServer, wg)
+	return wg
 }
 
 // Force quit all listening servers
