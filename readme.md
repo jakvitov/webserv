@@ -26,10 +26,16 @@ ____    | | | |   __| __  |   __|   __| __  |  |  |
 ```
 
 ## Configuration
-Configuration is done trough a **yaml** config file. Path to this file is passed to webserv as its first parameter. For instance:                                                          
+Configuration is done trough a **yaml** config file. Path to this file is passed to webserv as its first parameter. For instance:   
+- On Unix based systems:                                                        
 ```bash
 webserv ./my_web_config.yaml
 ```
+- On Windows:
+```bash
+webserv.exe .\my_web_config.yaml
+```
+
 
 ## Config structure
 - Structure of the yaml config file is as follows:
