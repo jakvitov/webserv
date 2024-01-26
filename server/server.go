@@ -71,10 +71,11 @@ func ServerInit(inputCnf *config.Config) *Server {
 	return srv
 }
 
-// Returns wait group, that is Done as soon as the server is listening on the give  port
-func (s *Server) StartListening() *sync.WaitGroup {
+// Returns wait group, that is Done as soon as the server is listening on the give port and finished setup
+// Write true to the terminated chan as soon as the server is closed
+func (s *Server) StartListening(terminated chan bool) *sync.WaitGroup {
 	wg := new(sync.WaitGroup)
-	s.ListenForSigterm()
+	s.ListenForSigterm(terminated)
 	static.PrintBannerDecoration(s.logger)
 	wg.Add(1)
 	go func(s *Server, srv *http.Server, wg *sync.WaitGroup) {
@@ -96,7 +97,7 @@ func (s *Server) Shutdown() {
 }
 
 // Listends for sigterm system signal and tries to gracefully shutdown afterwards
-func (s *Server) ListenForSigterm() {
+func (s *Server) ListenForSigterm(terminated chan bool) {
 	//Channel listening to sigterm signal
 	sigNotif := make(chan os.Signal, 1)
 	signal.Notify(sigNotif,
@@ -109,5 +110,6 @@ func (s *Server) ListenForSigterm() {
 		sig := <-sigNotif
 		s.logger.Finfo("Recieved %s signal. Attempting gracefull shutdown.", sig.String())
 		s.Shutdown()
+		terminated <- true
 	}()
 }
