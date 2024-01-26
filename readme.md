@@ -1,5 +1,29 @@
+```text
+ __  __  _ _ _ _____ _____ _____ _____ _____ _____           
+____    | | | |   __| __  |   __|   __| __  |  |  |          
+   ___  | | | |   __| __ -|__   |   __|    -|  |  |          
+ ___  _ |_____|_____|_____|_____|_____|__|__|\___/           
+
+```
 # Webserv - lightweight webserver
 Webserv is a **lightweight** Go based webserver. Besides classic static page serving and logging capablilities, it also offers reverse proxy functionality. Webserv can be used to **aggregate all HTTP/S based services** under one port and log all access in one point.   
+
+## Running Webserv
+Download binaries for your target platform and start the server with configuration according to the *Configuration* section. The following screen should appear:
+```log
+[INFO];[YOUR_DATE_TIME];Creating http server for port [TARGET_PORT]
+[INFO];[YOUR_DATE_TIME];Created server cache with max size of [MAX_CACHE_SET] bytes.
+[INFO];[YOUR_DATE_TIME];                                                                                                                          
+ __  __  _ _ _ _____ _____ _____ _____ _____ _____           
+____    | | | |   __| __  |   __|   __| __  |  |  |          
+   ___  | | | |   __| __ -|__   |   __|    -|  |  |          
+ ___  _ |_____|_____|_____|_____|_____|__|__|\___/           
+
+                                                             
+                                                             
+[INFO];[YOUR_DATE_TIME];Starting listener on port [:TARGET_PORT]
+
+```
 
 ## Configuration
 Configuration is done trough a **yaml** config file. Path to this file is passed to webserv as its first parameter. For instance:                                                          
