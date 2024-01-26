@@ -21,7 +21,6 @@ logger:
   append_output: bool
 
 handler:
-  #Only mandatory
   content_root: string
   read_timeout_ms: int
   write_timeout_ms: int
@@ -33,17 +32,14 @@ handler:
 reverse_proxy:
   routes:
     - from: string
-    - to: int
+      to: int
     - from: string
-    - to: int
+      to: int
 
 security: 
   cert_path: string
-  spam_filter: bool
 
 ```
-
-The only mandatory field in the config file is content_root, which does specify the target directory with webpage. 
 
 ### Default config values
 If any of the config values is not present, following values are used instead. Values not listed here are ignored, when not set meaning, that their feature is turned off. 
@@ -59,7 +55,7 @@ logger:
   append_output: false
 
 handler:
-  #Mandatory
+  #Mandatory content root or proxy settings
   content_root: string
   read_timeout_ms: 1000
   write_timeout_ms: 1000
@@ -71,8 +67,7 @@ handler:
 
 # Todo
 - Help man page
-- Reverse proxy routing
-- Spam filter
 - Load testing
 - Cache rebalance atomicity
 - Write documentation
+- Reverse proxy regex
