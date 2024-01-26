@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -19,9 +20,10 @@ const ONLY_INDEX_FILE string = "../test/web_content/only_index_webpage/index.htm
 const CORRECT_CONFIG string = "../test/config/correct_simple_config.yaml"
 
 func TestServerInit(t *testing.T) {
+	term := new(sync.WaitGroup)
 	cnf, err := config.ReadConfig(CORRECT_CONFIG)
 	assert.NilError(t, err)
-	srv := server.ServerInit(cnf)
+	srv := server.ServerInit(cnf, term)
 	wg := srv.StartListening()
 
 	wg.Wait()
@@ -33,14 +35,15 @@ func TestServerInit(t *testing.T) {
 	defer res.Body.Close()
 	assert.Check(t, res != nil)
 	srv.Shutdown()
-	wg.Wait()
+	term.Wait()
 }
 
 // Test serving of the only index webpage
 func TestServerOnlyIndexWebpage(t *testing.T) {
+	term := new(sync.WaitGroup)
 	cnf, err := config.ReadConfig(CORRECT_CONFIG)
 	assert.NilError(t, err)
-	srv := server.ServerInit(cnf)
+	srv := server.ServerInit(cnf, term)
 	wg := srv.StartListening()
 	//Let the server load properly
 	wg.Wait()
@@ -54,14 +57,16 @@ func TestServerOnlyIndexWebpage(t *testing.T) {
 	assert.NilError(t, err)
 	assert.DeepEqual(t, body, expected)
 	srv.Shutdown()
+	term.Wait()
 }
 
 func BenchmarkCacheOneFile(b *testing.B) {
+	term := new(sync.WaitGroup)
 	cnf, err := config.ReadAndVerify("../test/config/minimal_config.yaml")
 	assert.NilError(b, err)
 	index, err := os.ReadFile("../test/web_content/only_index_webpage/index.html")
 	assert.NilError(b, err)
-	srv := server.ServerInit(cnf)
+	srv := server.ServerInit(cnf, term)
 	wg := srv.StartListening()
 	wg.Wait()
 	for i := 0; i < b.N; i++ {
@@ -74,4 +79,5 @@ func BenchmarkCacheOneFile(b *testing.B) {
 		assert.DeepEqual(b, resData, index)
 	}
 	srv.Shutdown()
+	term.Wait()
 }

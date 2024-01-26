@@ -26,6 +26,7 @@ type Server struct {
 	httpsServer *http.Server
 	//Lookup map for reverse proxy fast lookups
 	logger *sharedlogger.SharedLogger
+	termWg *sync.WaitGroup
 }
 
 func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http.Server {
@@ -44,7 +45,8 @@ func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http
 	}
 }
 
-func ServerInit(inputCnf *config.Config) *Server {
+// Init the server with the termination wait group and input config
+func ServerInit(inputCnf *config.Config, terminateWg *sync.WaitGroup) *Server {
 	var lg *sharedlogger.SharedLogger
 	if inputCnf.Logger.OutputToFile {
 		//Open as create or append
@@ -67,17 +69,19 @@ func ServerInit(inputCnf *config.Config) *Server {
 		cnf:        inputCnf,
 		logger:     lg,
 		httpServer: initHttpServer(inputCnf, lg),
+		//Waitgroup to be Done() when the server is shut down
+		termWg: terminateWg,
 	}
 	return srv
 }
 
 // Returns wait group, that is Done as soon as the server is listening on the give port and finished setup
-// Write true to the terminated chan as soon as the server is closed
-func (s *Server) StartListening(terminated chan bool) *sync.WaitGroup {
+func (s *Server) StartListening() *sync.WaitGroup {
 	wg := new(sync.WaitGroup)
-	s.ListenForSigterm(terminated)
+	s.ListenForSigterm()
 	static.PrintBannerDecoration(s.logger)
 	wg.Add(1)
+	s.termWg.Add(1)
 	go func(s *Server, srv *http.Server, wg *sync.WaitGroup) {
 		s.logger.Finfo("Starting listener on port [%s]", srv.Addr)
 		wg.Done()
@@ -91,13 +95,15 @@ func (s *Server) StartListening(terminated chan bool) *sync.WaitGroup {
 
 // Force quit all listening servers
 func (s *Server) Shutdown() {
+	//Free the wait group after shutdown
+	defer s.termWg.Done()
 	if err := s.httpServer.Shutdown(context.Background()); err != nil {
 		s.logger.Error(err.Error())
 	}
 }
 
 // Listends for sigterm system signal and tries to gracefully shutdown afterwards
-func (s *Server) ListenForSigterm(terminated chan bool) {
+func (s *Server) ListenForSigterm() {
 	//Channel listening to sigterm signal
 	sigNotif := make(chan os.Signal, 1)
 	signal.Notify(sigNotif,
@@ -110,6 +116,5 @@ func (s *Server) ListenForSigterm(terminated chan bool) {
 		sig := <-sigNotif
 		s.logger.Finfo("Recieved %s signal. Attempting gracefull shutdown.", sig.String())
 		s.Shutdown()
-		terminated <- true
 	}()
 }

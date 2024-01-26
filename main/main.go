@@ -6,6 +6,7 @@ import (
 	"cz/jakvitov/webserv/server"
 	"fmt"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -19,12 +20,14 @@ func main() {
 		err.ErrorPrompt(fmt.Sprintf("Cannot setup config. %s\n", readErr.Error()))
 		return
 	}
-	terminated := make(chan bool, 1)
-	srv := server.ServerInit(cnf)
-	wg := srv.StartListening(terminated)
+	//Wait group for the server to finish
+	terminated := new(sync.WaitGroup)
+
+	srv := server.ServerInit(cnf, terminated)
+	wg := srv.StartListening()
 	//Wait until the server starts up
 	wg.Wait()
 
 	//Block until the server is terminated
-	<-terminated
+	terminated.Wait()
 }

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"sync"
 	"testing"
-	"time"
 
 	"gotest.tools/v3/assert"
 )
@@ -17,49 +16,40 @@ const URL string = "http://localhost:3000/"
 const FORWARDED string = "X-Forwarded-For"
 
 // Runs the server from the given config
-func startServer(t *testing.T, path string) (*server.Server, *sync.WaitGroup) {
+func startServer(t *testing.T, path string, term *sync.WaitGroup) (*server.Server, *sync.WaitGroup) {
 	cnf, err := config.ReadConfig(path)
 	assert.NilError(t, err)
-	srv := server.ServerInit(cnf)
+	srv := server.ServerInit(cnf, term)
 	wg := srv.StartListening()
-	//Let the server load properly
-	time.Sleep(100 * time.Millisecond)
 	return srv, wg
 }
 
-// Test the reverse proxy functionality
-func TestProxy(t *testing.T) {
-	//Channels for concurrency orchestration
-	sdnormal := make(chan bool, 1)
-	sdproxy := make(chan bool, 1)
-	waitchan := make(chan int, 2)
-	//Start server
-	go func(sdchan chan bool, waitchan chan int) {
-		basicSrv, basicWg := startServer(t, BASIC_SERVER_PATH)
-		basicWg.Wait()
-		waitchan <- 1
-		shutdown := <-sdchan
-		if shutdown {
-			basicSrv.Shutdown()
-			waitchan <- 1
-		}
-	}(sdnormal, waitchan)
+func TestProxyForwarded(t *testing.T) {
+	sdResourceSrv := make(chan bool, 1)
+	sdProxySrv := make(chan bool, 1)
+	startedSrvs := make(chan int, 2)
 
-	go func(sdchan chan bool, waitchan chan int) {
-		proxySrv, proxyWg := startServer(t, REVERSE_PROXY_CONFIG)
-		proxyWg.Wait()
-		waitchan <- 1
-		shutdown := <-sdchan
-		if shutdown {
-			proxySrv.Shutdown()
-			waitchan <- 1
-		}
-	}(sdproxy, waitchan)
+	terminatedWg := new(sync.WaitGroup)
+	go func(term *sync.WaitGroup) {
+		srv, startupWg := startServer(t, BASIC_SERVER_PATH, term)
+		startupWg.Wait()
+		startedSrvs <- 1
+		<-sdResourceSrv
+		srv.Shutdown()
+	}(terminatedWg)
+
+	go func(term *sync.WaitGroup) {
+		srv, startupWg := startServer(t, REVERSE_PROXY_CONFIG, term)
+		startupWg.Wait()
+		startedSrvs <- 1
+		<-sdProxySrv
+		srv.Shutdown()
+	}(terminatedWg)
 
 	//Wait for both servers to start
 	ready := 0
 	for ready != 2 {
-		sig := <-waitchan
+		sig := <-startedSrvs
 		ready += sig
 	}
 
@@ -70,13 +60,9 @@ func TestProxy(t *testing.T) {
 	assert.Equal(t, found, true)
 	assert.Assert(t, len(forwarded) > 0)
 
-	//Shutdown the
-	sdnormal <- true
-	sdproxy <- true
-	ready = 0
-	for ready != 2 {
-		sig := <-waitchan
-		ready += sig
-	}
-
+	//Shutdown both servers
+	sdResourceSrv <- true
+	sdProxySrv <- true
+	//Await both servers termination
+	terminatedWg.Wait()
 }
