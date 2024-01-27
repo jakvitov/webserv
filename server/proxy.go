@@ -47,14 +47,19 @@ func (p *ProxyHandler) IsProxied(r *http.Request) bool {
 	}
 	_, present := p.proxyMap[r.URL.Path]
 	if !present {
-		for key := range p.proxyMap {
+		for key, val := range p.proxyMap {
 			match, err := regexp.MatchString(key, r.URL.Path)
 			if !match || err != nil {
 				return false
 			}
+			//We matched the pattern trough regex
+			//We save this value to the routing map, so we dont have to compute the
+			//regex in O(n) again and can just lookup in map
+			p.proxyMap[r.URL.Path] = val
 			return true
 		}
 	}
+	//The pattern is already in the proxy map
 	return true
 }
 
