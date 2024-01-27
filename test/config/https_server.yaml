@@ -1,0 +1,15 @@
+ports:
+  https_port: 8443
+
+logger:
+  level: INFO
+  output_to_file: true
+  append_output: true
+
+handler:
+  content_root: "../test/web_content/only_index_webpage"
+  cache_enabled: true
+
+security: 
+  cert_path: "../test/security/localhost_cert.pem"
+  priv_key_path: "../test/security/localhost_key.pem"

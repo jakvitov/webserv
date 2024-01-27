@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"cz/jakvitov/webserv/cache"
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/sharedlogger"
@@ -15,9 +16,6 @@ import (
 	"syscall"
 	"time"
 )
-
-const INFO_LOG_PREFIX string = "WEBSERV_SERVER [INFO]:"
-const ERROR_LOG_PREFIX string = "WEBSERV_SERVER [ERROR]:"
 
 // Crentral struct holding info about all the http listeners and config
 type Server struct {
@@ -42,6 +40,33 @@ func initHttpServer(cnf *config.Config, logger *sharedlogger.SharedLogger) *http
 		ReadTimeout:    time.Duration(cnf.Handler.ReadTimeout) * time.Millisecond,
 		WriteTimeout:   time.Duration(cnf.Handler.WriteTimeout) * time.Millisecond,
 		MaxHeaderBytes: cnf.Handler.MaxHeaderBytes,
+	}
+}
+
+// If the config contains https port, start a https server, if not, don't
+// Cache and handler should be already ready from the http server
+func initHttpsServer(cnf *config.Config, logger *sharedlogger.SharedLogger, handler *http.Handler) *http.Server {
+	if cnf.Ports.HttpsPort == 0 {
+		return nil
+	}
+	if cnf.Handler.CacheEnabled {
+		logger.Finfo("Using server cache of [%d] bytes for https.", cnf.Handler.MaxCacheSize)
+	}
+
+	certif, err := static.LoadTlsCerfificate(cnf.Security.CertPath, cnf.Security.PrivateKeyPath, logger)
+	if err != nil {
+		logger.Error("Certificate cannot be loaded. HTTPS server won't be launched!")
+		return nil
+	}
+	return &http.Server{
+		Addr:           fmt.Sprintf(":%d", cnf.Ports.HttpsPort),
+		Handler:        *handler,
+		ReadTimeout:    time.Duration(cnf.Handler.ReadTimeout) * time.Millisecond,
+		WriteTimeout:   time.Duration(cnf.Handler.WriteTimeout) * time.Millisecond,
+		MaxHeaderBytes: cnf.Handler.MaxHeaderBytes,
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{*certif},
+		},
 	}
 }
 
@@ -72,6 +97,7 @@ func ServerInit(inputCnf *config.Config, terminateWg *sync.WaitGroup) *Server {
 		//Waitgroup to be Done() when the server is shut down
 		termWg: terminateWg,
 	}
+	srv.httpsServer = initHttpsServer(inputCnf, lg, &srv.httpServer.Handler)
 	return srv
 }
 
@@ -82,22 +108,50 @@ func (s *Server) StartListening() *sync.WaitGroup {
 	static.PrintBannerDecoration(s.logger)
 	wg.Add(1)
 	s.termWg.Add(1)
-	go func(s *Server, srv *http.Server, wg *sync.WaitGroup) {
-		s.logger.Finfo("Starting listener on port [%s]", srv.Addr)
+	//Start http server
+	go func() {
+		s.logger.Finfo("Starting http listener on port [:%d]", s.cnf.Ports.HttpPort)
 		wg.Done()
-		err := srv.ListenAndServe()
+		err := s.httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.logger.Fatal(err.Error())
 		}
-	}(s, s.httpServer, wg)
+	}()
+
+	//No need to init https server - it is disabled
+	if s.httpsServer == nil {
+		return wg
+	}
+
+	//Enabled https -> we need to initialise it
+	wg.Add(1)
+	s.termWg.Add(1)
+	//Start https server
+	go func() {
+		s.logger.Finfo("Starting https listener on port [:%d]", s.cnf.Ports.HttpsPort)
+		wg.Done()
+		err := s.httpsServer.ListenAndServeTLS(s.cnf.Security.CertPath, s.cnf.Security.PrivateKeyPath)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.logger.Ferror("Error while opening the TLS server [%s]\n", err.Error())
+		}
+	}()
 	return wg
 }
 
 // Force quit all listening servers
 func (s *Server) Shutdown() {
-	//Free the wait group after shutdown
+	//Free the wait groups after shutdown
 	defer s.termWg.Done()
 	if err := s.httpServer.Shutdown(context.Background()); err != nil {
+		s.logger.Error(err.Error())
+	}
+	//We do not have https server
+	if s.httpsServer == nil {
+		return
+	}
+	//We have to shutdown the https as well
+	defer s.termWg.Done()
+	if err := s.httpsServer.Shutdown(context.Background()); err != nil {
 		s.logger.Error(err.Error())
 	}
 }

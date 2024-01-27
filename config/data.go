@@ -47,8 +47,8 @@ type ReverseProxy struct {
 }
 
 type Security struct {
-	CertPath   string `yaml:"cert_path"`
-	SpamFilter bool   `yaml:"spam_filter"`
+	CertPath       string `yaml:"cert_path"`
+	PrivateKeyPath string `yaml:"priv_key_path"`
 }
 
 type Config struct {

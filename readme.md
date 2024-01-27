@@ -68,6 +68,7 @@ reverse_proxy:
 
 security: 
   cert_path: string
+  priv_key_path: string 
 
 ```
 

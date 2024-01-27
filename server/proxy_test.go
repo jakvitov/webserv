@@ -3,6 +3,7 @@ package server_test
 import (
 	"cz/jakvitov/webserv/config"
 	"cz/jakvitov/webserv/server"
+	echoserver "cz/jakvitov/webserv/test/echo_server"
 	"net/http"
 	"sync"
 	"testing"
@@ -69,7 +70,6 @@ func TestProxyForwarded(t *testing.T) {
 	terminatedWg.Wait()
 }
 
-/*
 func TestProxyRegex(t *testing.T) {
 	echoStartup := new(sync.WaitGroup)
 	echoShutdown := make(chan bool, 1)
@@ -80,7 +80,7 @@ func TestProxyRegex(t *testing.T) {
 	proxyStartup := make(chan bool, 1)
 
 	go func() {
-		echoserver.RunEchoServer(8080, echoStartup, echoShutdown, echoShutdownCompleted)
+		go echoserver.RunEchoServer(8080, echoStartup, echoShutdown, echoShutdownCompleted)
 	}()
 
 	go func() {
@@ -92,6 +92,7 @@ func TestProxyRegex(t *testing.T) {
 	}()
 
 	<-proxyStartup
+	echoStartup.Wait()
 
 	//Test the response that is not proxied
 	res, err := http.Get("http://localhost:3000/djflkajd")
@@ -101,11 +102,10 @@ func TestProxyRegex(t *testing.T) {
 	//This should proxy to echo server
 	res, err = http.Get("http://localhost:3000/test/djdjdjdj")
 	assert.NilError(t, err)
-	assert.Equal(t, res.Status, 200)
+	assert.Equal(t, res.StatusCode, 200)
 
 	echoShutdown <- true
 	<-echoShutdownCompleted
 	proxyShutdownSignal <- true
 	proxyShutdownWg.Wait()
 }
-*/
