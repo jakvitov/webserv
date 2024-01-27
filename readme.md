@@ -100,4 +100,3 @@ handler:
 - Load testing
 - Cache rebalance atomicity
 - Write documentation
-- Reverse proxy regex

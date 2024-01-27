@@ -1,0 +1,15 @@
+--------------------------------------------------
+Welcome to the Webserv help menu.
+Pick one of the following manual sections:
+
+[1] -> Running Webserv 
+[2] -> Webserv configuration file
+[3] -> Static routing
+[4] -> Reverse proxy
+[5] -> HTTPS setup
+[6] -> Contribute to development and report a bug
+[0] -> Exit from menu 
+--------------------------------------------------
+
+Pick one of the following topics by writing down 
+its number or cancel by writing 0. 
