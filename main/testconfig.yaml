@@ -1,5 +1,6 @@
 ports:
   http_port: 8000
+  https_port: 8443
 
 logger:
   level: INFO
@@ -10,3 +11,7 @@ logger:
 handler:
   content_root: "../test/web_content/deeper_webpage"
   cache_enabled: true
+
+security: 
+  cert_path: "../test/security/localhost_cert.pem"
+  priv_key_path: "../test/security/localhost_key.pem"

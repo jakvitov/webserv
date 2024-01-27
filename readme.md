@@ -96,6 +96,17 @@ handler:
 
 ```
 
+### Security TLS setup
+For correct HTTPS setup, a TLS certificate and private key is required. You can self sign one, or get a CA issued pem. Note, that self signing certificates is recommended only for testing purposes. 
+Webserv requires you to have **both certificates in the PEM format and with .pem suffix!** Provide path to both private key and certificate in the *security* yaml key. 
+- For example:
+
+ ```yaml
+ security: 
+  cert_path: ./my_certificate.pem
+  priv_key_path: ./my_private_key.pem
+ ```
+
 # Todo
 - Help man page
 - Load testing
