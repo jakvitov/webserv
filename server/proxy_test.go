@@ -12,6 +12,8 @@ import (
 
 const BASIC_SERVER_PATH string = "../test/config/minimal_config.yaml"
 const REVERSE_PROXY_CONFIG string = "../test/config/reverse_proxy_config.yaml"
+const REVERSE_PROXY_REGEX_CONFIG string = "../test/config/reverse_proxy_regex_config.yaml"
+
 const URL string = "http://localhost:3000/"
 const FORWARDED string = "X-Forwarded-For"
 
@@ -66,3 +68,44 @@ func TestProxyForwarded(t *testing.T) {
 	//Await both servers termination
 	terminatedWg.Wait()
 }
+
+/*
+func TestProxyRegex(t *testing.T) {
+	echoStartup := new(sync.WaitGroup)
+	echoShutdown := make(chan bool, 1)
+	echoShutdownCompleted := make(chan bool, 1)
+
+	proxyShutdownWg := new(sync.WaitGroup)
+	proxyShutdownSignal := make(chan bool, 1)
+	proxyStartup := make(chan bool, 1)
+
+	go func() {
+		echoserver.RunEchoServer(8080, echoStartup, echoShutdown, echoShutdownCompleted)
+	}()
+
+	go func() {
+		srv, startupWg := startServer(t, REVERSE_PROXY_REGEX_CONFIG, proxyShutdownWg)
+		startupWg.Wait()
+		proxyStartup <- true
+		<-proxyShutdownSignal
+		srv.Shutdown()
+	}()
+
+	<-proxyStartup
+
+	//Test the response that is not proxied
+	res, err := http.Get("http://localhost:3000/djflkajd")
+	assert.NilError(t, err)
+	assert.Equal(t, res.StatusCode, 404)
+
+	//This should proxy to echo server
+	res, err = http.Get("http://localhost:3000/test/djdjdjdj")
+	assert.NilError(t, err)
+	assert.Equal(t, res.Status, 200)
+
+	echoShutdown <- true
+	<-echoShutdownCompleted
+	proxyShutdownSignal <- true
+	proxyShutdownWg.Wait()
+}
+*/

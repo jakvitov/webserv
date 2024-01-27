@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -17,9 +18,16 @@ const FORWARDED string = "Forwarded"
 type ProxyHandler struct {
 	proxyMap map[string]int
 	logger   *sharedlogger.SharedLogger
+	enabled  bool
 }
 
 func ProxyHandlerInit(conf *config.ReverseProxy, logger *sharedlogger.SharedLogger) *ProxyHandler {
+	if conf == nil || conf.Routes == nil || len(conf.Routes) == 0 {
+		return &ProxyHandler{
+			enabled: false,
+			logger:  logger,
+		}
+	}
 	pmap := make(map[string]int)
 	for _, rprox := range conf.Routes {
 		pmap[rprox.From] = rprox.To
@@ -28,13 +36,26 @@ func ProxyHandlerInit(conf *config.ReverseProxy, logger *sharedlogger.SharedLogg
 	return &ProxyHandler{
 		proxyMap: pmap,
 		logger:   logger,
+		enabled:  true,
 	}
 }
 
 // Should we proxy the request
 func (p *ProxyHandler) IsProxied(r *http.Request) bool {
+	if !p.enabled {
+		return false
+	}
 	_, present := p.proxyMap[r.URL.Path]
-	return present
+	if !present {
+		for key := range p.proxyMap {
+			match, err := regexp.MatchString(key, r.URL.Path)
+			if !match || err != nil {
+				return false
+			}
+			return true
+		}
+	}
+	return true
 }
 
 func (p *ProxyHandler) handleHeaders(r *http.Request, target string) {
