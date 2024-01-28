@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-const SECTION_PREFIX string = "../static/resources/section_"
+const SECTION_PREFIX string = "static/resources/section_"
 
 func printBanner(lg *sharedlogger.SharedLogger) *error {
-	banner, err := os.ReadFile("../static/resources/banner.txt")
+	banner, err := os.ReadFile("static/resources/banner.txt")
 	if err != nil {
 		return &err
 	}
@@ -45,7 +45,7 @@ func printChosenSection(section int) {
 
 // Print the help menu and capture user input
 func HelpMenu() {
-	data, err := os.ReadFile("../static/resources/help.txt")
+	data, err := os.ReadFile("static/resources/help.txt")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Fatal error,  cannot open the help menu resources!")
 		return

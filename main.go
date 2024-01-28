@@ -5,10 +5,14 @@ import (
 	"cz/jakvitov/webserv/err"
 	"cz/jakvitov/webserv/server"
 	"cz/jakvitov/webserv/static"
+	"embed"
 	"fmt"
 	"os"
 	"sync"
 )
+
+//go:embed static/resources*
+var content embed.FS
 
 const HELP string = "--help"
 
