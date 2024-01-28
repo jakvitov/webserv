@@ -1,5 +1,4 @@
 module cz/jakvitov/webserv
-
 go 1.21.5
 
 require (

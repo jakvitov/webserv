@@ -100,7 +100,7 @@ func (p *ProxyHandler) handleResponse(r *http.Response, w http.ResponseWriter, e
 func (p *ProxyHandler) ProxyRequest(r *http.Request, w http.ResponseWriter, errorCallback func(w http.ResponseWriter, uuid string), uuid string) {
 	port, found := p.proxyMap[r.URL.Path]
 	if !found {
-		p.logger.Ferror("Not found proxy port for url %s.", r.URL.Path)
+		p.logger.Ferror("%s;Not found proxy port for url %s.", uuid, r.URL.Path)
 		return
 	}
 	//Construction of the redirection url path
