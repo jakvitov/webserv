@@ -1,0 +1,47 @@
+--------------------------------------------------
+
+- Reverse proxy is the second main function of 
+the Webserv application, which contributes to its 
+usability as a complete facade over all server 
+HTTP services.
+
+- Reverse proxy will delegate all requests made to 
+given URI to provided port in the config file.
+URL of the request will be changed to localhost.
+
+- This allows the user to expose only one or two 
+ports (HTTP and HTTPS) and facade with them multiple
+HTTP based servers via URI routing. Typical usage 
+is one backend server operating on 
+http://localhost:9000/api and frontend served with
+webserv on https://mywebsite:443/. With apropriate
+proxy settings, we achieve routing all requests
+with /api prefix to our localhost backend and the
+rest on frontend.
+
+- Reverse proxy settings do support REGEX matching.
+Each request at proxied endpoint will be matched
+with the endpoint name given in the config file 
+using the standard POSIX regular expressions.
+
+- Example of reverse proxy setup, to forward all 
+requests from all https://url:443/api* to port 
+9000 is listed bellow.
+
+ports:
+  http_port: 80
+  https_port: 443
+
+reverse_proxy:
+  routes:
+      - from: "/api/*"
+        to: 9000
+
+**tls certificate config etc***
+
+- Note that each request is proxied to its target
+as HTTP request, thus other services should
+communicate over a secure network. Typical usage
+involves safe proxying to localhost port.
+
+--------------------------------------------------

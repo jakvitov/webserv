@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+const SECTION_PREFIX string = "../static/resources/section_"
+
 func printBanner(lg *sharedlogger.SharedLogger) *error {
 	banner, err := os.ReadFile("../static/resources/banner.txt")
 	if err != nil {
@@ -27,12 +29,18 @@ func PrintBannerDecoration(logger *sharedlogger.SharedLogger) {
 // Verify user choice
 // Return false if choice is invalid
 func verifyMenuChoice(input int) bool {
-	return input < 7
+	return input < 8
 }
 
 // Print menu section, that the user chose to see
 func printChosenSection(section int) {
-	fmt.Printf("SECTION %d\n", section)
+	file, err := os.ReadFile(fmt.Sprintf("%s%d.txt", SECTION_PREFIX, section))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while scanning from the stdin [%s]\n.", err.Error())
+		return
+	}
+	fmt.Println(string(file))
+	HelpMenu()
 }
 
 // Print the help menu and capture user input

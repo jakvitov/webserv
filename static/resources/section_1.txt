@@ -1,0 +1,23 @@
+--------------------------------------------------
+- Download binaries for your target platform and start 
+the server with configuration according to
+the Configuration (section 2).
+ 
+- Start the application by running 
+webserv server_config.yaml
+
+The following screen should appear:
+
+[INFO];[YOUR_DATE_TIME];Creating http server for port [TARGET_PORT]
+[INFO];[YOUR_DATE_TIME];Created server cache with max size of [MAX_CACHE_SET] bytes.
+[INFO];[YOUR_DATE_TIME];                                                                                                                          
+ __  __  _ _ _ _____ _____ _____ _____ _____ _____           
+____    | | | |   __| __  |   __|   __| __  |  |  |          
+   ___  | | | |   __| __ -|__   |   __|    -|  |  |          
+ ___  _ |_____|_____|_____|_____|_____|__|__|\___/           
+
+                                                             
+                                                             
+[INFO];[YOUR_DATE_TIME];Starting listener on port [:TARGET_PORT]
+
+--------------------------------------------------

@@ -1,0 +1,28 @@
+--------------------------------------------------
+
+- Cache is one of the essential parts of Webserv. 
+If enabled, it allows to significantly improve 
+speed of the server, by loading given pages from RAM.
+
+- Cache size can be limited in the yaml config and 
+its size will never overgrow. Each time we cache 
+a new file, we remove the necessary amount of bytes
+from cache. Thre removed files are selected from
+the least used ones.
+
+- HTTP and HTTPS ports both share the same cache,
+but cache does not apply to proxied requests using
+the reverse proxy functionality. 
+
+- When cache size is not explictly set, default 
+value of 20MB is used, we can disable caching 
+completely by setting cache_enabled to false.
+
+- Example cache config is given bellow:
+
+handler:
+  content_root: "~/web/"
+  max_cache_bytes: 100000000
+  cache_enabled: true
+
+--------------------------------------------------

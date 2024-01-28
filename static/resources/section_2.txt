@@ -1,0 +1,73 @@
+--------------------------------------------------
+- In order for the server to work, you need to provide
+a configuration file in valid yaml format. 
+
+- The config structure is as follows:
+
+ports:
+  http_port: int
+  https_port: int
+
+logger:
+  level: [INFO, WARN, ERROR, FATAL]
+  output_to_file: bool
+  output_file: string
+  append_output: bool
+
+handler:
+  content_root: string
+  read_timeout_ms: int
+  write_timeout_ms: int
+  max_header_bytes: int
+  cache_enabled: bool
+  //If cache is enabled and this is 0 or not set, we default to 20MB
+  max_cache_bytes: int64
+
+reverse_proxy:
+  routes:
+    - from: string
+      to: int
+    - from: string
+      to: int
+
+security: 
+  cert_path: string
+  priv_key_path: string  
+
+- The only required values to start and run the
+server properly are either reverse_proxy or
+content_root. Every other necessary property
+will default to these values. 
+
+ports:
+  http_port: 8080
+
+logger:
+  level: "INFO"
+  output_to_file: true
+  output_file: "./websersv_log.log"
+  append_output: false
+
+handler:
+  #Mandatory content root or proxy settings
+  content_root: string
+  read_timeout_ms: 1000
+  write_timeout_ms: 1000
+  max_header_bytes: 1 << 20
+  cache_enabled: false
+  max_cache_bytes: 20 * 1000 * 1000
+
+- Values, that are not listed here will be ignored
+and their functionality will be turned off.
+
+- Example of a valid config, that will run a http
+website on default port 8080 and serve 
+contents of the directory given in the relative 
+path given in content root.
+
+example_cfg.yaml:
+
+handler:
+  content_root: "../test/web_content/only_index_webpage"
+  cache_enabled: true
+--------------------------------------------------

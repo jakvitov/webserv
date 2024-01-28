@@ -1,0 +1,35 @@
+--------------------------------------------------
+
+- The main functions of Webserv are HTTP server and 
+proxy routing. This section will elaborate on the 
+HTTP serving part.  
+
+- Webserv serves files over a TCP connection using 
+the HTTP protocol on a port configured in the 
+ports config key. 
+
+- Each request to the server causes Webserv to 
+pass the given request to a handler in a new 
+goroutine. Goroutines do not map 1:1 to threads,
+so the usage of threads will be smaller or equal
+(worst case) than in classic thread per request
+scenario.
+
+- If the given file is found, than it's returned
+with the 200 HTTP status code. If not, then 404
+NOT FOUND or 500 INTERNAL SERVER ERROR is returned
+in case of internal server error.
+
+- Additional secifications and restrictions for 
+the HTTP requests can be configured in the handler
+section of the config file as listed in the example
+bellow. 
+
+handler:
+  content_root: string
+  read_timeout_ms: int
+  write_timeout_ms: int
+  max_header_bytes: int
+  cache_enabled: bool
+  max_cache_bytes: int64
+--------------------------------------------------

@@ -4,10 +4,11 @@ Pick one of the following manual sections:
 
 [1] -> Running Webserv 
 [2] -> Webserv configuration file
-[3] -> Static routing
+[3] -> HTTP server
 [4] -> Reverse proxy
 [5] -> HTTPS setup
-[6] -> Contribute to development and report a bug
+[6] -> Cache
+[7] -> Contribute to development or report a bug
 [0] -> Exit from menu 
 --------------------------------------------------
 
