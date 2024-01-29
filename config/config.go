@@ -87,7 +87,7 @@ func verifyHanlder(hd *Handler) {
 	if hd.WriteTimeout == 0 {
 		hd.WriteTimeout = WRITE_TIMEOUT_MS_DEFAULT
 	}
-	if hd.CacheEnabled == true && hd.MaxCacheSize == 0 {
+	if hd.CacheEnabled && hd.MaxCacheSize == 0 {
 		hd.MaxCacheSize = DEFAULT_CACHE_SIZE
 	}
 }

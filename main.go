@@ -12,6 +12,7 @@ import (
 )
 
 //go:embed static/resources*
+//lint:ignore U1000
 var content embed.FS
 
 const HELP string = "--help"

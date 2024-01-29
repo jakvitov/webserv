@@ -24,6 +24,7 @@ type HttpRequestHandler struct {
 	proxyHandler *ProxyHandler
 }
 
+//lint:ignore U1000
 func (h *HttpRequestHandler) internalServerError(w http.ResponseWriter, uuid string) {
 	w.WriteHeader(500)
 	w.Write([]byte(INTERNAL_SERVER_ERROR))

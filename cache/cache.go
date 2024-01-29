@@ -66,7 +66,6 @@ func (c *Cache) addOrRebalance(cf *CachedFile) {
 
 	//Now we have made the space required for the new file
 	c.encache(cf)
-	return
 }
 
 // Add a file to cache if he fits or free space for him in a separate thread
