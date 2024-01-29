@@ -11,7 +11,7 @@ mapfile -t dirs < "$file"
 
 for dir in "${dirs[@]}"; do
     echo "Testing in: $dir" 
-    go test $dir
+    go test -race $dir
 done
 
 echo "Tests completed"

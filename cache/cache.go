@@ -2,7 +2,6 @@ package cache
 
 import (
 	"cz/jakvitov/webserv/sharedlogger"
-	"os"
 	"sync"
 )
 
@@ -13,8 +12,7 @@ type Cache struct {
 	maxBytes  int64
 	totalSize int64
 	//Lock for rebalance
-	mutex   sync.Mutex
-	locked  bool
+	mutex   sync.RWMutex
 	logger  *sharedlogger.SharedLogger
 	enabled bool
 }
@@ -26,22 +24,21 @@ func CacheInit(max int64, enabled bool, logger *sharedlogger.SharedLogger) *Cach
 		maxBytes:  max,
 		totalSize: 0,
 		logger:    logger,
-		locked:    false,
 		enabled:   enabled,
 	}
 }
 
 func (c *Cache) encache(cf *CachedFile) {
-	c.logger.Finfo("Cached file [%s]\n", cf.GetPath())
+	c.logger.Finfo("Cached file [%s]", cf.GetPath())
 	c.totalSize += cf.GetSize()
 	c.files[cf.GetPath()] = cf
 }
 
 func (c *Cache) addOrRebalance(cf *CachedFile) {
 	c.mutex.Lock()
-	c.locked = true
-	defer func() { c.locked = false }()
-	defer c.mutex.Unlock()
+	defer func() {
+		c.mutex.Unlock()
+	}()
 
 	//We have free space to accomoddate this file
 	if cf.GetSize() <= c.maxBytes-c.totalSize {
@@ -70,13 +67,11 @@ func (c *Cache) addOrRebalance(cf *CachedFile) {
 
 // Add a file to cache if he fits or free space for him in a separate thread
 func (c *Cache) Get(path string) ([]byte, error) {
-	//We are rebalancing in another goroutine or we do not use cache
-	if c.locked || !c.enabled {
-		res, err := os.ReadFile(path)
-		return res, err
-	}
 
+	c.mutex.Lock()
 	file, found := c.files[path]
+	c.mutex.Unlock()
+
 	//We cannot cache same file twice
 	if found {
 		return file.GetData(), nil
@@ -87,10 +82,17 @@ func (c *Cache) Get(path string) ([]byte, error) {
 		c.logger.Warn("Error while opening file: " + err.Error())
 		return nil, err
 	}
+
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	//The file is too large to be cached, we just return it and do not cache
 	if cf.GetSize() > c.maxBytes {
 		return cf.GetData(), nil
 	}
-	go c.addOrRebalance(cf)
+
+	//Await until the rebalance locks
+	defer func() {
+		go c.addOrRebalance(cf)
+	}()
 	return cf.GetData(), nil
 }
