@@ -1,8 +1,4 @@
-![Build](https://github.com/jakvitov/webserv/actions/workflows/build.yml/badge.svg)
-
-![Tests](https://github.com/jakvitov/webserv/actions/workflows/tests.yml/badge.svg)
-
-![Audit](https://github.com/jakvitov/webserv/actions/workflows/audit.yml/badge.svg)
+![Build](https://github.com/jakvitov/webserv/actions/workflows/build.yml/badge.svg)![Tests](https://github.com/jakvitov/webserv/actions/workflows/tests.yml/badge.svg) ![Audit](https://github.com/jakvitov/webserv/actions/workflows/audit.yml/badge.svg)
 
 ```text
  __  __  _ _ _ _____ _____ _____ _____ _____ _____           
