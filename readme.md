@@ -1,3 +1,5 @@
+![Build](https://github.com/jakvitov/webserv/actions/workflows/audit.yml/badge.svg)
+
 ```text
  __  __  _ _ _ _____ _____ _____ _____ _____ _____           
 ____    | | | |   __| __  |   __|   __| __  |  |  |          
