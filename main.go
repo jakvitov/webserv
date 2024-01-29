@@ -12,7 +12,7 @@ import (
 )
 
 //go:embed static/resources*
-//lint:ignore U1000
+//lint:ignore U1000 Ignore unused field with a reason
 var content embed.FS
 
 const HELP string = "--help"
