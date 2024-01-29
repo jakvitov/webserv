@@ -81,7 +81,7 @@ func (s *SharedLogger) Error(message string) {
 // Not followed by any other action than log
 func (s *SharedLogger) Ferror(message string, args ...any) {
 	if s.level == config.INFO || s.level == config.WARN || s.level == config.ERROR {
-		s.errorLogger.Printf("%s;%s;%s\n", ERROR_PREFIX, getDateTimeLogPrefix(), fmt.Sprintf(message, args))
+		s.errorLogger.Printf("%s;%s;%s\n", ERROR_PREFIX, getDateTimeLogPrefix(), fmt.Sprintf(message, args...))
 	}
 }
 
