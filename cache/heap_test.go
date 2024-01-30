@@ -8,15 +8,16 @@ import (
 
 // Test heap push pops and rebalancing with loging cached files
 func TestMinHeap(t *testing.T) {
-	cf1, err := CachedFileInit("../main/main.go")
+	cf1, err := CachedFileInit("../main.go")
 	cf2, err2 := CachedFileInit("./heap_test.go")
 	cf3, err3 := CachedFileInit("./heap.go")
-	cf1.read = 10
-	cf2.read = 5
-	cf3.read = 1
+
 	assert.NilError(t, err)
 	assert.NilError(t, err2)
 	assert.NilError(t, err3)
+	cf1.read = 10
+	cf2.read = 5
+	cf3.read = 1
 
 	fh := &CachedFileHeap{}
 	//heap.Init(fh)
