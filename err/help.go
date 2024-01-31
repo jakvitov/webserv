@@ -20,4 +20,5 @@ func ErrorPrompt(message string) {
 // Displays the server usage prompt to the screen
 func PrintHelp() {
 	fmt.Printf("For info about the application usage use the --help falg!\n")
+	fmt.Printf("For info about the application version --info or --help falg!\n")
 }

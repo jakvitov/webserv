@@ -16,6 +16,8 @@ import (
 var content embed.FS
 
 const HELP string = "--help"
+const INFO string = "--info"
+const VERSION string = "--version"
 
 func main() {
 	if len(os.Args) != 2 {
@@ -27,6 +29,9 @@ func main() {
 
 	if path == HELP {
 		static.HelpMenu()
+		return
+	} else if path == VERSION || path == INFO {
+		static.PrintVersionInfo()
 		return
 	}
 
