@@ -8,6 +8,12 @@ import (
 
 const SECTION_PREFIX string = "static/resources/section_"
 
+var (
+	VERSION         string
+	BUILD_TIMESTAMP string
+	COMMIT_HASH     string
+)
+
 func printBanner(lg *sharedlogger.SharedLogger) *error {
 	banner, err := os.ReadFile("static/resources/banner.txt")
 	if err != nil {
@@ -24,6 +30,13 @@ func PrintBannerDecoration(logger *sharedlogger.SharedLogger) {
 	if err != nil {
 		logger.Finfo("Error while opening banner: [%s]\n", (*err).Error())
 	}
+}
+
+func PrintVersionInfo() {
+	fmt.Printf("Webserv build info: \n")
+	fmt.Printf("\t - version: [%s]\n", VERSION)
+	fmt.Printf("\t - build timestamp: [%s]\n", BUILD_TIMESTAMP)
+	fmt.Printf("\t - build comit hash:  [%s]\n", COMMIT_HASH)
 }
 
 // Verify user choice
