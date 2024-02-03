@@ -8,16 +8,10 @@ import (
 
 const SECTION_PREFIX string = "static/resources/section_"
 
-var (
-	Version        string
-	BuildTimestamp string
-	CommitHash     string
-)
-
-func PrintVersionInfo() {
-	fmt.Printf("Version: %s\n", Version)
-	fmt.Printf("Build Timestamp: %s\n", BuildTimestamp)
-	fmt.Printf("Commit Hash: %s\n", CommitHash)
+func PrintVersionInfo(version, buildTimestamp, commitHash string) {
+	fmt.Printf("Version: %s\n", version)
+	fmt.Printf("Build Timestamp: %s\n", buildTimestamp)
+	fmt.Printf("Commit Hash: %s\n", commitHash)
 }
 
 func printBanner(lg *sharedlogger.SharedLogger) *error {

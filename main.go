@@ -19,6 +19,12 @@ const HELP string = "--help"
 const INFO string = "--info"
 const VERSION string = "--version"
 
+var (
+	Version        string
+	BuildTimestamp string
+	CommitHash     string
+)
+
 func main() {
 	if len(os.Args) != 2 {
 		err.ErrorPrompt(fmt.Sprintf("Invalid number of arguments, required 1, found %d\n", len(os.Args)-1))
@@ -31,7 +37,7 @@ func main() {
 		static.HelpMenu()
 		return
 	} else if path == VERSION || path == INFO {
-		static.PrintVersionInfo()
+		static.PrintVersionInfo(Version, BuildTimestamp, CommitHash)
 		return
 	}
 
