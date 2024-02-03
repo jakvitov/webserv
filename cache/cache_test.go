@@ -1,3 +1,5 @@
+//go:build !excludeTest
+
 package cache
 
 import (

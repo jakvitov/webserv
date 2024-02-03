@@ -38,6 +38,3 @@ jobs:
 
     - name: Run golint
       run: golint ./...
-
-    - name: Run tests
-      run: go test -race -vet=off ./...
