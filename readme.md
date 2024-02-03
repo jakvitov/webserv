@@ -109,8 +109,8 @@ Webserv requires you to have **both certificates in the PEM format and with .pem
   priv_key_path: ./my_private_key.pem
  ```
 
-# Todo
-- Help man page
-- Load testing
-- Cache rebalance atomicity
-- Write documentation
+### More info
+- More detailed info can be found by launching the application with the **--help** flag. 
+```bash
+./webserv --help
+```
